@@ -1,6 +1,0 @@
-<div class="container page-section">
-  <div class="page-heading"><div class="eyebrow blue">RESOURCE LIBRARY</div><h1>자료실<span class="blue-dot">.</span></h1><p>프로젝트 문서와 학습 자료를 모아 둔 공간입니다</p></div>
-  <div class="library-toolbar"><span><strong><%= @files.size %></strong>개의 공개 자료</span><form action="/files" method="get" class="search-form"><%= icon('search') %><label class="sr-only" for="file-search">자료 검색</label><input id="file-search" name="q" maxlength="120" placeholder="자료 이름으로 검색" value="<%= h(@query['q']) %>"><button type="submit" class="search-submit" aria-label="검색하기"><%= icon('arrow') %></button></form></div>
-  <% if @files.empty? %><div class="empty-state"><%= icon('file') %><h2>표시할 자료가 없습니다</h2><p>새 자료가 공개되면 이곳에서 내려받을 수 있습니다</p><% unless @query['q'].to_s.empty? %><a href="/files" class="button secondary">검색 초기화</a><% end %></div><% else %><div class="file-list library"><% @files.each do |file| %><%= partial('file_row', file: file) %><% end %></div><% end %>
-  <div class="library-note"><%= icon('download') %><p>공개된 자료만 표시됩니다. 파일은 다운로드한 뒤 사용 중인 프로그램으로 열어 주세요.</p></div>
-</div>
