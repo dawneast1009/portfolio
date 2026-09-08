@@ -72,7 +72,7 @@ HTML 파일을 더블클릭하는 것이 아니라 Ruby 서버를 실행해야 �
 1. 작성자 메뉴의 ‘공유 및 제출’에서 ‘제출용 사이트 ZIP 받기’를 누릅니다.
 2. ZIP을 풀고 `index.html`을 열어 공개할 기록과 파일이 있는지 확인합니다.
 3. 별도의 공개 GitHub 저장소(예: `portfolio-submission`)를 만듭니다. 작성용 Ruby 소스 저장소를 강제로 공개로 바꿀 필요는 없습니다.
-4. ZIP 자체가 아니라 그 안의 `index.html`, `about.html`, `career.html`, `activities.html`, `projects.html`, 기록별 HTML, `assets/`, `files/`, `.nojekyll`을 저장소 첫 화면에 올립니다.
+4. ZIP 자체가 아니라 압축을 푼 폴더 안의 내용 전체를 저장소 첫 화면에 올립니다. 여기에는 `index.html`, 기본 페이지 HTML, 목차에서 추가한 `page-*.html`, 기록별 HTML, `assets/`, `files/`, `.nojekyll`이 포함됩니다.
 5. 저장소 `Settings → Pages → Source: Deploy from a branch → main / (root) → Save`를 선택합니다.
 6. 배포가 끝난 뒤 Pages 화면에 표시되는 실제 주소를 열어 확인하고 제출합니다.
 

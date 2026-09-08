@@ -33,7 +33,7 @@ module Portfolio
     def initialize(config:, repository:, path:, authenticated:, csrf:, flash:, title:, data: {})
       @config, @repo, @path, @admin = config, repository, path, authenticated
       @profile = repository.profile
-      @navigation = repository.notebook_navigation
+      @navigation = data.fetch(:navigation) { repository.notebook_navigation }
       @csrf, @flash, @title = csrf, flash, title
       @values = {}
       @error = nil

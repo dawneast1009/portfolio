@@ -79,6 +79,26 @@ class NotebookTest < Minitest::Test
     15.times { |index| @repo.save_notebook_page({'title'=>"추가 #{index}", 'description'=>'', 'icon'=>'file'}) }
     assert_raises(Portfolio::ValidationError) { @repo.save_notebook_page({'title'=>'초과', 'description'=>'', 'icon'=>'file'}) }
   end
+  def test_navigation_validates_section_limit_text_boundaries_and_moves
+    page = @repo.save_notebook_page({'title'=>'검증', 'description'=>'', 'icon'=>'file'})
+    assert_raises(Portfolio::ValidationError) do
+      @repo.save_notebook_page({'title'=>'가' * 61, 'description'=>'', 'icon'=>'file'})
+    end
+    assert_raises(Portfolio::ValidationError) do
+      @repo.save_notebook_page({'title'=>'제목', 'description'=>'가' * 301, 'icon'=>'file'})
+    end
+    assert_raises(Portfolio::ValidationError) do
+      @repo.save_notebook_section(page['id'], {'title'=>"잘못된\u0001항목"})
+    end
+    sections = 30.times.map { |index| @repo.save_notebook_section(page['id'], {'title'=>"항목 #{index}"}) }
+    assert_raises(Portfolio::ValidationError) do
+      @repo.save_notebook_section(page['id'], {'title'=>'초과'})
+    end
+    assert_raises(Portfolio::ValidationError) { @repo.move_notebook_page(page['id'], 'left') }
+    assert_raises(Portfolio::NotFound) do
+      @repo.move_notebook_section('about', sections.first['id'], 'up')
+    end
+  end
   def test_saves_and_filters_entries_by_page_and_section
     item = entry
     assert_equal 'about', item['notebook_page']

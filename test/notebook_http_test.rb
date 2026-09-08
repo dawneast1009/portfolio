@@ -43,6 +43,11 @@ class HttpTest
       form:{'_csrf'=>token,'direction'=>'up'}).code
     assert_equal '303', request('POST',"/admin/navigation/pages/#{page['id']}/delete", form:{'_csrf'=>token}).code
     refute Portfolio::Notebook.page(@repo.notebook_navigation,page['id'])
+    legacy_id = request('POST','/admin/navigation/pages/about/sections/career_history',
+      form:{'_csrf'=>token,'title'=>'진로 경험 요약'})
+    assert_equal '303', legacy_id.code
+    about = Portfolio::Notebook.page(@repo.notebook_navigation,'about')
+    assert_equal '진로 경험 요약', Portfolio::Notebook.section(about,'career_history')['title']
   end
 
   def test_navigation_manager_renders_deletion_errors_without_losing_records

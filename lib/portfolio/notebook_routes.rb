@@ -4,17 +4,17 @@ require_relative 'static_export'
 module Portfolio
   # Reuse the original request/session/parser boundary; only school UI routes change.
   module NotebookRoutes
-    NAVIGATION_ID = '[a-z0-9-]{1,40}'
+    NAVIGATION_ID = '[a-z0-9_-]{1,40}'
     LEGACY_NOTEBOOK_PATHS = %w[/about /career /activities /projects].freeze
 
     private
     def dispatch_get
       navigation = @repo.notebook_navigation
       page = navigation.find { |item| Notebook.path(item['id']) == @path }
-      return render_notebook_page(page['id']) if page
+      return render_notebook_page(page['id'], navigation:navigation) if page
       case @path
       when '/admin'
-        render_notebook_page('home')
+        render_notebook_page('home', navigation:navigation)
       when '/admin/share'
         render('notebook/share', title:'공유 및 제출', page_key:'home')
       when '/admin/navigation'
@@ -31,7 +31,7 @@ module Portfolio
         page_key = selected_page['id']
         section = @query['section'] || selected_page['sections'].first&.fetch('id')
         Notebook.validate(page_key, section, '', navigation:navigation)
-        render_entry_form({'page'=>page_key,'section'=>section,'status'=>'draft','level'=>''})
+        render_entry_form({'page'=>page_key,'section'=>section,'status'=>'draft','level'=>''}, navigation:navigation)
       when %r{\A/admin/notebook/(#{RequestContext::ID})/edit\z}
         record = @repo.project(Regexp.last_match(1))
         raise NotFound unless record
@@ -40,7 +40,7 @@ module Portfolio
         record = @repo.project(Regexp.last_match(1))
         raise NotFound unless record && (record['status'] == 'published' || @authenticated)
         render('notebook/entry',title:record['title'],record:record,
-          page_key:Notebook.page_of(record, navigation))
+          page_key:Notebook.page_of(record, navigation), navigation:navigation)
       when *LEGACY_NOTEBOOK_PATHS
         raise NotFound
       else
@@ -114,10 +114,11 @@ module Portfolio
       end
     end
 
-    def render_notebook_page(page_id)
-      page = Notebook.page(@repo.notebook_navigation, page_id)
+    def render_notebook_page(page_id, navigation: @repo.notebook_navigation)
+      page = Notebook.page(navigation, page_id)
       raise NotFound unless page
-      render('notebook/page', title:page['title'], page_key:page_id, filter_query:@query['q'].to_s)
+      render('notebook/page', title:page['title'], page_key:page_id,
+        filter_query:@query['q'].to_s, navigation:navigation)
     end
 
     def render_navigation_manager(error: nil, status: 200)
@@ -137,13 +138,13 @@ module Portfolio
         'section'=>Notebook.section_of(record, navigation), 'link'=>record['live_url'].to_s)
     end
 
-    def render_entry_form(values, error: nil, status:200)
-      navigation = @repo.notebook_navigation
+    def render_entry_form(values, error: nil, status:200, navigation: @repo.notebook_navigation)
       selected_page = Notebook.page(navigation, values['page']) || Notebook.page(navigation, 'projects') || navigation.first
       raise NotFound unless selected_page
       key = selected_page['id']
       render('notebook/editor', title:values['id'] ? '기록 편집' : '새 기록',
-        values:values, error:error, status:status, page_key:key, record:values['id'] ? @repo.project(values['id']) : nil)
+        values:values, error:error, status:status, page_key:key,
+        record:values['id'] ? @repo.project(values['id']) : nil, navigation:navigation)
     end
 
     def save_notebook_entry(id = nil)
