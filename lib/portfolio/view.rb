@@ -33,6 +33,7 @@ module Portfolio
     def initialize(config:, repository:, path:, authenticated:, csrf:, flash:, title:, data: {})
       @config, @repo, @path, @admin = config, repository, path, authenticated
       @profile = repository.profile
+      @navigation = repository.notebook_navigation
       @csrf, @flash, @title = csrf, flash, title
       @values = {}
       @error = nil
@@ -89,6 +90,9 @@ module Portfolio
     end
 
     def skills = @profile['skills'].to_s.split(',').map(&:strip).reject(&:empty?)
+    def notebook_pages = @navigation
+    def notebook_page(id) = Notebook.page(@navigation, id)
+    def notebook_section(page_id, section_id) = Notebook.section(notebook_page(page_id), section_id)
     def page_href(page)
       @static ? (page == 'home' ? 'index.html' : "#{page}.html") : Notebook.path(page)
     end
@@ -100,19 +104,20 @@ module Portfolio
     def attached_files(record)
       @repo.files.select { |f| f['project_id'] == record['id'] && (@admin || @repo.public_file?(f)) }
     end
-    def entry_page(record) = Notebook.page_of(record)
-    def entry_section(record) = Notebook.section_of(record)
+    def entry_page(record) = Notebook.page_of(record, @navigation)
+    def entry_section(record) = Notebook.section_of(record, @navigation)
     def notebook_records(page, section = nil)
       records = @repo.notebook_entries(page, section:section, public_only:!@admin)
       query = @filter_query.to_s.strip.downcase
       query.empty? ? records : records.select { |record| [record['title'],record['body'],*record['tags']].join(' ').downcase.include?(query) }
     end
     def current_page
-      return @page_key if @page_key && Notebook::PAGES.key?(@page_key)
+      return @page_key if @page_key && notebook_page(@page_key)
       return 'home' if @path == '/' || @path == '/admin'
-      Notebook::PAGES.keys.find { |key| @path == "/#{key}" } || 'home'
+      match = notebook_pages.find { |page| Notebook.path(page['id']) == @path }
+      match ? match['id'] : 'home'
     end
-    def current_title = Notebook::PAGES[current_page][:title]
+    def current_title = notebook_page(current_page)&.fetch('title', nil) || '홈'
     def editable? = @admin && !@static
     def free_preview? = !@static && @config.storage_dir.include?('portfolio-preview')
     def nav_count = @repo.messages.count { |message| !message['read'] }

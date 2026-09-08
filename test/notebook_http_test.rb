@@ -57,6 +57,34 @@ class HttpTest
     assert_includes home.body.force_encoding('UTF-8'), '홈 메뉴는 삭제할 수 없습니다'
   end
 
+  def test_custom_navigation_drives_public_pages_and_record_editor
+    login
+    page = @repo.save_notebook_page({'title'=>'수상','description'=>'도전의 결과','icon'=>'folder'})
+    section = @repo.save_notebook_section(page['id'], {'title'=>'교내 수상'})
+    item = @repo.save_entry({'title'=>'과학상','body'=>'탐구 결과','page'=>page['id'],
+      'section'=>section['id'],'status'=>'published','level'=>''})
+    public_page = request('GET', "/#{page['id']}", cookie:false)
+    assert_equal '200', public_page.code
+    assert_includes public_page.body.force_encoding('UTF-8'), '도전의 결과'
+    assert_includes public_page.body.force_encoding('UTF-8'), '과학상'
+    home = request('GET','/',cookie:false).body.force_encoding('UTF-8')
+    assert_includes home, '수상'
+    assert_includes home, '교내 수상'
+    refute_includes home, '/admin/navigation'
+    editor = request('GET', "/admin/notebook/#{item['id']}/edit")
+    assert_equal '200', editor.code
+    assert_includes editor.body.force_encoding('UTF-8'), '교내 수상'
+    assert_includes request('GET','/admin/navigation').body.force_encoding('UTF-8'), '목차 관리'
+  end
+
+  def test_navigation_title_changes_keep_existing_public_route
+    @repo.save_notebook_page({'title'=>'나에 대하여','description'=>'새 소개','icon'=>'user'}, id:'about')
+    response = request('GET','/about',cookie:false)
+    assert_equal '200', response.code
+    assert_includes response.body.force_encoding('UTF-8'), '나에 대하여'
+    assert_equal '404', request('GET','/page-000000000000',cookie:false).code
+  end
+
   def test_notebook_five_pages_show_correct_sections
     { '/' => '포트폴리오', '/about'=>'가치관', '/career'=>'관심 직업', '/activities'=>'사용 프로그램 및 숙련도', '/projects'=>'주제탐구보고서' }.each do |path, text|
       response = request('GET', path)

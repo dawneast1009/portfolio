@@ -1,17 +1,17 @@
-<% page = Notebook::PAGES.fetch(@page_key) %>
+<% page = notebook_page(@page_key) %>
 <header class="page-heading">
-  <div class="page-symbol"><%= icon(page[:icon]) %></div>
-  <div class="heading-row"><h1><%= h(@page_key == 'home' ? @profile['headline'] : page[:title]) %></h1><% if editable? && @page_key == 'home' %><div class="heading-actions"><a class="button quiet" href="/admin/profile"><%= icon('edit') %>소개 수정</a><a class="button quiet" href="/admin/navigation"><%= icon('grid') %>목차 편집</a></div><% end %></div>
-  <p class="page-description"><%= h(@page_key == 'home' ? @profile['intro'] : page[:description]) %></p>
+  <div class="page-symbol"><%= icon(page['icon']) %></div>
+  <div class="heading-row"><h1><%= h(@page_key == 'home' ? @profile['headline'] : page['title']) %></h1><% if editable? && @page_key == 'home' %><div class="heading-actions"><a class="button quiet" href="/admin/profile"><%= icon('edit') %>소개 수정</a><a class="button quiet" href="/admin/navigation"><%= icon('grid') %>목차 편집</a></div><% end %></div>
+  <p class="page-description"><%= h(@page_key == 'home' ? @profile['intro'] : page['description']) %></p>
 </header>
 <% if @page_key == 'home' %>
   <section class="home-guide" aria-labelledby="index-title"><h2 id="index-title">포트폴리오 둘러보기</h2><div class="page-index">
-    <% Notebook::PAGES.reject { |key,_| key == 'home' }.each_with_index do |(key,item),index| %>
-    <a href="<%= page_href(key) %>" class="index-row"><span class="index-icon"><%= icon(item[:icon]) %></span><span class="index-copy"><strong><%= h(item[:title]) %></strong><small><%= h(item[:sections].values.first(3).join(' · ')) %></small></span><%= icon('arrow') %></a>
+    <% notebook_pages.reject { |item| item['id'] == 'home' }.each_with_index do |item,index| %>
+    <a href="<%= page_href(item['id']) %>" class="index-row"><span class="index-icon"><%= icon(item['icon']) %></span><span class="index-copy"><strong><%= h(item['title']) %></strong><small><%= h(item['sections'].first(3).map { |section| section['title'] }.join(' · ')) %></small></span><%= icon('arrow') %></a>
     <% end %>
   </div></section>
 <% else %>
-<nav class="section-jumps" aria-label="페이지 안의 항목"><% page[:sections].each do |key,label| %><a href="#<%= key %>"><%= h(label) %></a><% end %></nav>
+<nav class="section-jumps" aria-label="페이지 안의 항목"><% page['sections'].each do |section| %><a href="#<%= h(section['id']) %>"><%= h(section['title']) %></a><% end %></nav>
 <% end %>
 <% if @page_key == 'about' %>
   <% unless @profile['bio'].to_s.empty? %><div class="prose legacy-intro"><%= paragraphs(@profile['bio']) %></div><% end %>
@@ -19,10 +19,10 @@
 <% end %>
 <% if @page_key == 'projects' && !@static %><form class="page-search" action="/projects" method="get"><label class="visually-hidden" for="project-query">프로젝트 검색</label><input id="project-query" name="q" maxlength="200" value="<%= h(@filter_query) %>" placeholder="제목 또는 내용으로 찾기"><button class="button quiet" type="submit"><%= icon('search') %>검색</button></form><% end %>
 <div class="document-sections">
-<% page[:sections].each do |section,label| %>
-  <% records = notebook_records(@page_key,section) %>
-  <section class="document-section" id="<%= section %>">
-    <div class="section-heading"><h2><%= h(label) %><span class="section-count"><%= records.size %></span></h2><% if editable? %><a class="button quiet small" href="/admin/notebook/new?page=<%= @page_key %>&amp;section=<%= section %>"><%= icon('plus') %>기록 추가</a><% end %></div>
+<% page['sections'].each do |section| %>
+  <% records = notebook_records(@page_key,section['id']) %>
+  <section class="document-section" id="<%= h(section['id']) %>">
+    <div class="section-heading"><h2><%= h(section['title']) %><span class="section-count"><%= records.size %></span></h2><% if editable? %><a class="button quiet small" href="/admin/notebook/new?page=<%= q(@page_key) %>&amp;section=<%= q(section['id']) %>"><%= icon('plus') %>기록 추가</a><% end %></div>
     <% if records.empty? %><p class="empty-note"><%= editable? ? '아직 기록이 없습니다. 글을 쓰거나 파일을 붙여 보세요.' : '아직 공개된 기록이 없습니다.' %></p><% end %>
     <% records.each do |record| %><%= partial('notebook/block', record:record) %><% end %>
   </section>

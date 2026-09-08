@@ -16,8 +16,8 @@
   <a class="workspace" href="<%= page_href('home') %>"><span class="workspace-icon"><%= icon('file') %></span><span><strong><%= h(@profile['display_name']) %></strong><small>나의 포트폴리오</small></span></a>
   <div class="sidebar-label">페이지</div>
   <nav aria-label="포트폴리오 메뉴">
-    <% Notebook::PAGES.each_with_index do |(key,page),index| %>
-    <a class="side-link <%= current_page == key ? 'is-current' : '' %>" href="<%= page_href(key) %>" <%= current_page == key ? 'aria-current="page"' : '' %>><%= icon(page[:icon]) %><span><%= h(page[:title]) %></span><small><%= index+1 %></small></a>
+    <% notebook_pages.each_with_index do |page,index| %>
+    <a class="side-link <%= current_page == page['id'] ? 'is-current' : '' %>" href="<%= page_href(page['id']) %>" <%= current_page == page['id'] ? 'aria-current="page"' : '' %>><%= icon(page['icon']) %><span><%= h(page['title']) %></span><small><%= index+1 %></small></a>
     <% end %>
   </nav>
   <div class="sidebar-bottom">

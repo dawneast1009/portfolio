@@ -8,8 +8,9 @@ module Portfolio
 
     private
     def dispatch_get
-      page = Notebook::PAGES.keys.find { |key| Notebook.path(key) == @path }
-      return render_notebook_page(page) if page
+      navigation = @repo.notebook_navigation
+      page = navigation.find { |item| Notebook.path(item['id']) == @path }
+      return render_notebook_page(page['id']) if page
       case @path
       when '/admin'
         render_notebook_page('home')
@@ -23,9 +24,12 @@ module Portfolio
         @res['Content-Disposition'] = 'attachment; filename="portfolio-submission.zip"'
         @res['Content-Length'] = @res.body.bytesize.to_s
       when '/admin/notebook/new'
-        page_key = Notebook::PAGES.key?(@query['page']) ? @query['page'] : 'projects'
-        section = @query['section'] || Notebook::PAGES[page_key][:sections].keys.first
-        Notebook.validate(page_key, section, '')
+        selected_page = Notebook.page(navigation, @query['page']) || Notebook.page(navigation, 'projects') ||
+          navigation.find { |item| !item['sections'].empty? }
+        raise ValidationError, '기록을 추가하려면 목차에 하위 항목을 먼저 만들어 주세요' unless selected_page
+        page_key = selected_page['id']
+        section = @query['section'] || selected_page['sections'].first&.fetch('id')
+        Notebook.validate(page_key, section, '', navigation:navigation)
         render_entry_form({'page'=>page_key,'section'=>section,'status'=>'draft','level'=>''})
       when %r{\A/admin/notebook/(#{RequestContext::ID})/edit\z}
         record = @repo.project(Regexp.last_match(1))
@@ -34,7 +38,8 @@ module Portfolio
       when %r{\A/(?:entry|projects)/(#{RequestContext::ID})\z}
         record = @repo.project(Regexp.last_match(1))
         raise NotFound unless record && (record['status'] == 'published' || @authenticated)
-        render('notebook/entry',title:record['title'],record:record,page_key:Notebook.page_of(record))
+        render('notebook/entry',title:record['title'],record:record,
+          page_key:Notebook.page_of(record, navigation))
       else
         super
       end
@@ -92,7 +97,7 @@ module Portfolio
         record = @repo.project(Regexp.last_match(1))
         raise NotFound unless record
         @repo.delete_project(record['id'])
-        redirect(Notebook.path(Notebook.page_of(record)), '기록과 연결된 첨부파일을 삭제했습니다')
+        redirect(Notebook.path(Notebook.page_of(record, @repo.notebook_navigation)), '기록과 연결된 첨부파일을 삭제했습니다')
       when '/admin/notebook-upload'
         upload_notebook_file
       when %r{\A/admin/notebook/(#{RequestContext::ID})/files/(#{RequestContext::ID})/(delete|visibility)\z}
@@ -106,8 +111,10 @@ module Portfolio
       end
     end
 
-    def render_notebook_page(page)
-      render('notebook/page', title:Notebook::PAGES.fetch(page)[:title], page_key:page, filter_query:@query['q'].to_s)
+    def render_notebook_page(page_id)
+      page = Notebook.page(@repo.notebook_navigation, page_id)
+      raise NotFound unless page
+      render('notebook/page', title:page['title'], page_key:page_id, filter_query:@query['q'].to_s)
     end
 
     def render_navigation_manager(error: nil, status: 200)
@@ -122,11 +129,16 @@ module Portfolio
     end
 
     def entry_form_values(record)
-      record.merge('page'=>Notebook.page_of(record),'section'=>Notebook.section_of(record), 'link'=>record['live_url'].to_s)
+      navigation = @repo.notebook_navigation
+      record.merge('page'=>Notebook.page_of(record, navigation),
+        'section'=>Notebook.section_of(record, navigation), 'link'=>record['live_url'].to_s)
     end
 
     def render_entry_form(values, error: nil, status:200)
-      key = Notebook::PAGES.key?(values['page']) ? values['page'] : 'projects'
+      navigation = @repo.notebook_navigation
+      selected_page = Notebook.page(navigation, values['page']) || Notebook.page(navigation, 'projects') || navigation.first
+      raise NotFound unless selected_page
+      key = selected_page['id']
       render('notebook/editor', title:values['id'] ? '기록 편집' : '새 기록',
         values:values, error:error, status:status, page_key:key, record:values['id'] ? @repo.project(values['id']) : nil)
     end
