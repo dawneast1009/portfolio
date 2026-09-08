@@ -16,3 +16,4 @@ __pycache__/
 # Local static exports should be published explicitly, not committed with server source
 /submission/
 /submission-*/
+.worktrees/
