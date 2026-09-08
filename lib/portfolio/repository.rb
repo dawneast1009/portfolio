@@ -29,6 +29,107 @@ module Portfolio
     def file(id) = @store.read['files'][id.to_s]
     def messages = @store.read['messages'].values.sort_by { |m| m['created_at'] }.reverse
 
+    def notebook_navigation
+      navigation = @store.read['notebook_navigation'] || Notebook.default_navigation
+      copy_value(navigation)
+    end
+
+    def save_notebook_page(input, id: nil)
+      title = text(input, 'title', max: 60, required: true)
+      description = text(input, 'description', max: 300)
+      icon = input['icon'].to_s
+      raise ValidationError, '목차 아이콘을 다시 선택해 주세요' unless Notebook::ICONS.include?(icon)
+      @store.update do |state|
+        navigation = navigation_state(state)
+        if !id && navigation.size >= Notebook::MAX_PAGES
+          raise ValidationError, '상위 메뉴는 최대 20개까지 만들 수 있습니다'
+        end
+        item = id ? Notebook.page(navigation, id) : nil
+        raise NotFound, '상위 메뉴를 찾을 수 없습니다' if id && !item
+        unless item
+          item = { 'id'=>unique_navigation_id('page', navigation.map { |page| page['id'] }), 'sections'=>[] }
+          navigation << item
+        end
+        item.merge!('title'=>title, 'description'=>description, 'icon'=>icon)
+        copy_value(item)
+      end
+    end
+
+    def move_notebook_page(id, direction)
+      @store.update do |state|
+        navigation = navigation_state(state)
+        item = Notebook.page(navigation, id)
+        raise NotFound, '상위 메뉴를 찾을 수 없습니다' unless item
+        move_navigation_item(navigation, id, direction, minimum_index: 1) unless id.to_s == 'home'
+        copy_value(item)
+      end
+    end
+
+    def delete_notebook_page(id)
+      @store.update do |state|
+        navigation = navigation_state(state)
+        item = Notebook.page(navigation, id)
+        raise NotFound, '상위 메뉴를 찾을 수 없습니다' unless item
+        raise ValidationError, '홈 메뉴는 삭제할 수 없습니다' if item['id'] == 'home'
+        if state['projects'].values.any? { |record| Notebook.page_of(record, navigation) == item['id'] }
+          raise ValidationError, '연결된 기록이 있어 메뉴를 삭제할 수 없습니다. 기록을 먼저 이동하거나 삭제해 주세요'
+        end
+        navigation.delete(item)
+        copy_value(item)
+      end
+    end
+
+    def save_notebook_section(page_id, input, id: nil)
+      title = text(input, 'title', max: 60, required: true)
+      @store.update do |state|
+        navigation = navigation_state(state)
+        page_record = Notebook.page(navigation, page_id)
+        raise NotFound, '상위 메뉴를 찾을 수 없습니다' unless page_record
+        sections = page_record['sections']
+        if !id && sections.size >= Notebook::MAX_SECTIONS
+          raise ValidationError, '하위 항목은 메뉴마다 최대 30개까지 만들 수 있습니다'
+        end
+        item = id ? Notebook.section(page_record, id) : nil
+        raise NotFound, '하위 항목을 찾을 수 없습니다' if id && !item
+        unless item
+          item = { 'id'=>unique_navigation_id('section', sections.map { |section| section['id'] }) }
+          sections << item
+        end
+        item['title'] = title
+        copy_value(item)
+      end
+    end
+
+    def move_notebook_section(page_id, id, direction)
+      @store.update do |state|
+        page_record = Notebook.page(navigation_state(state), page_id)
+        raise NotFound, '상위 메뉴를 찾을 수 없습니다' unless page_record
+        item = Notebook.section(page_record, id)
+        raise NotFound, '하위 항목을 찾을 수 없습니다' unless item
+        move_navigation_item(page_record['sections'], id, direction)
+        copy_value(item)
+      end
+    end
+
+    def delete_notebook_section(page_id, id)
+      @store.update do |state|
+        navigation = navigation_state(state)
+        page_record = Notebook.page(navigation, page_id)
+        raise NotFound, '상위 메뉴를 찾을 수 없습니다' unless page_record
+        item = Notebook.section(page_record, id)
+        raise NotFound, '하위 항목을 찾을 수 없습니다' unless item
+        linked = state['projects'].values.any? do |record|
+          Notebook.page_of(record, navigation) == page_record['id'] &&
+            Notebook.section_of(record, navigation) == item['id']
+        end
+        if linked
+          raise ValidationError, '연결된 기록이 있어 항목을 삭제할 수 없습니다. 기록을 먼저 이동하거나 삭제해 주세요'
+        end
+        page_record['sections'].delete(item)
+        copy_value(item)
+      end
+    end
+
     def public_projects(query: '', tag: '', category: '')
       projects.select do |p|
         haystack = [p['title'], p['summary'], *p['tags']].join(' ').downcase
@@ -93,14 +194,15 @@ module Portfolio
         'year' => text(input, 'year', max: 4),
         'demo' => demo
       }
-      if input.key?('notebook_page')
-        data.merge!(Notebook.validate(input['notebook_page'], input['notebook_section'], input['level']))
-      end
       data['year'] = Time.now.year.to_s if data['year'].empty?
       raise ValidationError, '연도는 네 자리 숫자로 입력해 주세요' unless data['year'].match?(/\A\d{4}\z/)
       raise ValidationError, '올바른 카테고리를 선택해 주세요' unless CATEGORIES.key?(data['category'])
       raise ValidationError, '공개 또는 비공개 상태를 선택해 주세요' unless %w[published draft].include?(data['status'])
       @store.update do |state|
+        if input.key?('notebook_page')
+          navigation = state['notebook_navigation'] || Notebook.default_navigation
+          data.merge!(Notebook.validate(input['notebook_page'], input['notebook_section'], input['level'], navigation:navigation))
+        end
         old = id ? state['projects'][id] : nil
         raise NotFound, '프로젝트를 찾을 수 없습니다' if id && !old
         data.merge!(old.slice('notebook_page', 'notebook_section', 'level')) if old && !input.key?('notebook_page')
@@ -277,6 +379,32 @@ module Portfolio
     end
 
     private
+
+    def navigation_state(state)
+      state['notebook_navigation'] ||= Notebook.default_navigation
+    end
+
+    def copy_value(value)
+      Marshal.load(Marshal.dump(value))
+    end
+
+    def unique_navigation_id(prefix, existing)
+      loop do
+        value = "#{prefix}-#{SecureRandom.hex(6)}"
+        return value unless existing.include?(value)
+      end
+    end
+
+    def move_navigation_item(items, id, direction, minimum_index: 0)
+      unless %w[up down].include?(direction.to_s)
+        raise ValidationError, '이동 방향을 다시 선택해 주세요'
+      end
+      index = items.index { |item| item['id'] == id.to_s }
+      raise NotFound, '목차 항목을 찾을 수 없습니다' unless index
+      target = index + (direction.to_s == 'up' ? -1 : 1)
+      return if target < minimum_index || target >= items.length
+      items[index], items[target] = items[target], items[index]
+    end
 
     def timestamp = Time.now.utc.iso8601(6)
 
