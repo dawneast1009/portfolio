@@ -1,0 +1,8 @@
+<header class="page-heading"><div class="page-symbol"><%= icon('external') %></div><h1>공유 및 제출</h1><p class="page-description">내용을 공개하고 포트폴리오 주소를 제출하세요</p></header>
+<section class="document-section"><h2>1. 공개할 내용 확인</h2><p>방문자는 <strong>공개 기록과 공개 첨부파일</strong>만 볼 수 있습니다. 비공개 기록의 파일은 공개로 설정해도 보이지 않습니다.</p><p class="muted">제출 전 로그아웃한 브라우저에서 확인하세요. 주민등록번호, 연락처, 다른 사람의 개인정보가 든 파일은 올리지 마세요.</p></section>
+<section class="document-section"><h2>2. 배포된 사이트 링크 복사</h2><label for="share-url">포트폴리오 홈 주소</label><div class="copy-row"><input id="share-url" readonly value="<%= h(@config.app_url) %>/"><button class="button" type="button" data-copy-home>주소 복사</button></div><p class="form-hint">localhost·127.0.0.1 주소는 내 컴퓨터에서만 열립니다. 이 버튼은 새 서버나 인터넷 주소를 생성하지 않습니다.</p></section>
+<section class="document-section"><h2>3. 무료로 보관할 제출본 내보내기</h2><p>공개한 5개 페이지와 기록, 첨부파일을 HTML 사이트로 묶습니다. 계정 정보와 비공개 자료는 포함하지 않습니다.</p><a class="button primary" href="/admin/export.zip"><%= icon('download') %>제출용 사이트 ZIP 받기</a><p class="form-hint">총 64 MiB 이하 · 다운로드한 제출본은 읽기 전용입니다</p>
+<div class="notice warning"><strong>무료 Render에만 원본을 두지 마세요</strong><p>무료 웹 서버는 재시작·재배포·유휴 종료 시 기록과 업로드 파일이 사라집니다. 내 컴퓨터의 Ruby 사이트에서 작성하는 것을 권장합니다.</p></div>
+<p><strong>무료 제출 순서</strong><br>내 컴퓨터에서 작성 → 제출용 ZIP 내보내기 → 별도의 공개 GitHub 저장소에 ZIP 내부 파일 업로드 → Settings / Pages에서 해당 브랜치의 루트를 선택 → 발급된 주소 제출</p>
+<p class="muted">GitHub Free의 Pages는 공개 저장소를 사용합니다. 공개해도 되는 자료만 넣으세요. 원본 프로젝트·storage·비밀번호는 제출용 저장소에 넣지 마세요.</p>
+<p class="muted">내보내기는 편집 데이터를 복구하는 백업이 아닙니다. 로컬 원본의 storage 폴더 전체는 서버를 종료한 뒤 별도로 보관하세요.</p></section>

@@ -1,0 +1,80 @@
+[
+  {
+    "width": 360,
+    "page": "/admin/notebook/248da497fd880de8392356b0/edit",
+    "overflow": false,
+    "mode": "offline-render"
+  },
+  {
+    "width": 360,
+    "page": "/admin/share",
+    "overflow": false,
+    "mode": "offline-render"
+  },
+  {
+    "width": 360,
+    "page": "/admin/profile",
+    "overflow": false,
+    "mode": "offline-render"
+  },
+  {
+    "width": 390,
+    "page": "/admin/notebook/248da497fd880de8392356b0/edit",
+    "overflow": false,
+    "mode": "offline-render"
+  },
+  {
+    "width": 390,
+    "page": "/admin/share",
+    "overflow": false,
+    "mode": "offline-render"
+  },
+  {
+    "width": 390,
+    "page": "/admin/profile",
+    "overflow": false,
+    "mode": "offline-render"
+  },
+  {
+    "width": 768,
+    "page": "/admin/notebook/248da497fd880de8392356b0/edit",
+    "overflow": false,
+    "mode": "offline-render"
+  },
+  {
+    "width": 768,
+    "page": "/admin/share",
+    "overflow": false,
+    "mode": "offline-render"
+  },
+  {
+    "width": 768,
+    "page": "/admin/profile",
+    "overflow": false,
+    "mode": "offline-render"
+  },
+  {
+    "width": 1440,
+    "page": "/admin/notebook/248da497fd880de8392356b0/edit",
+    "overflow": false,
+    "mode": "offline-render"
+  },
+  {
+    "width": 1440,
+    "page": "/admin/share",
+    "overflow": false,
+    "mode": "offline-render"
+  },
+  {
+    "width": 1440,
+    "page": "/admin/profile",
+    "overflow": false,
+    "mode": "offline-render"
+  },
+  {
+    "zip_crc": "pass",
+    "relative_link_targets": "pass",
+    "static_pages": 14,
+    "credentials_excluded": true
+  }
+]

@@ -5,13 +5,13 @@ require 'fileutils'
 module Portfolio
   class Store
     DEFAULT_PROFILE = {
-      'display_name' => 'dawneast', 'role' => 'DEVELOPMENT / SECURITY / NOTES',
-      'headline' => "만든 것과\n배운 것을 남깁니다",
-      'intro' => '개발과 보안을 공부하며 작은 아이디어를 직접 구현합니다. 결과뿐 아니라 만들면서 배운 과정도 함께 기록합니다.',
-      'bio' => "코드를 읽고 직접 만들어 보며 배우는 것을 좋아합니다.\n\n이곳에는 작업한 프로젝트와 공부한 내용을 차곡차곡 모읍니다. 각 프로젝트에서 무엇을 만들었고 어떤 문제를 해결했는지 기록합니다.",
-      'skills' => 'Ruby, HTML / CSS, Python, Linux, CTF',
+      'display_name' => 'dawneast', 'role' => '나의 성장 기록',
+      'headline' => '나의 포트폴리오',
+      'intro' => '나의 관심과 진로, 활동과 결과물을 한곳에 정리합니다.',
+      'bio' => '',
+      'skills' => '',
       'github_url' => '', 'blog_url' => '', 'contact_email' => '',
-      'location' => '대한민국', 'resume_id' => '', 'status' => 'BUILDING & LEARNING'
+      'location' => '', 'resume_id' => '', 'status' => ''
     }.freeze
 
     def initialize(directory)

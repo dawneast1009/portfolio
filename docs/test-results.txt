@@ -1,9 +1,113 @@
-Run options: --seed 37901
+Run options: -v --seed 19523
 
 # Running:
 
-.........................................................................
+DeploymentTest#test_deployment_requires_explicit_storage_path = 0.00 s = .
+DeploymentTest#test_new_storage_without_password_fails_closed = 0.00 s = .
+DeploymentTest#test_restart_preserves_account_and_does_not_need_bootstrap_secret = 1.05 s = .
+DeploymentTest#test_custom_https_origin_and_platform_port_are_respected = 0.51 s = .
+DeploymentTest#test_free_blueprint_is_explicitly_a_nonpersistent_preview = 0.00 s = .
+DeploymentTest#test_demo_is_only_seeded_on_first_account_creation = 0.65 s = .
+DeploymentTest#test_restart_never_resets_password_from_environment = 1.59 s = .
+DeploymentTest#test_first_boot_creates_account_and_uses_render_origin = 1.07 s = .
+DeploymentTest#test_default_blueprint_is_free_and_cannot_create_a_paid_disk = 0.00 s = .
+DeploymentTest#test_invalid_or_missing_origin_is_rejected_before_creating_account = 0.00 s = .
+DeploymentTest#test_short_password_is_rejected_and_removed = 0.00 s = .
+SetupTest#test_setup_creates_account_and_explicit_demo_without_echoing_password = 1.20 s = .
+SetupTest#test_noninteractive_input_requires_an_explicit_flag = 0.32 s = .
+SetupTest#test_rerun_does_not_overwrite_an_existing_password = 1.23 s = .
+SetupTest#test_short_or_mismatched_password_is_rejected = 0.66 s = .
+SetupTest#test_reset_keeps_projects_and_replaces_password = 2.09 s = .
+NotebookTest#test_rejects_invalid_page_and_section = 0.00 s = .
+NotebookTest#test_school_document_extensions_and_bad_signatures = 0.00 s = .
+NotebookTest#test_draft_files_remain_private_even_when_file_flag_is_public = 0.00 s = .
+NotebookTest#test_unsafe_link_rejected = 0.00 s = .
+NotebookTest#test_legacy_project_is_visible_in_personal_projects = 0.00 s = .
+NotebookTest#test_static_export_is_public_only_and_relative = 0.04 s = .
+NotebookTest#test_saves_and_filters_entries_by_page_and_section = 0.01 s = .
+NotebookTest#test_five_exact_menus_and_school_categories = 0.01 s = .
+NotebookTest#test_skill_level_and_update_preserve_identity = 0.01 s = .
+HttpTest#test_duplicate_multipart_fields_are_rejected = 0.93 s = .
+HttpTest#test_file_page_preselects_the_linked_project = 0.89 s = .
+HttpTest#test_private_admin_redirects_to_login = 0.40 s = .
+HttpTest#test_project_body_is_html_escaped = 0.42 s = .
+HttpTest#test_cross_origin_mutation_is_rejected = 0.83 s = .
+HttpTest#test_notebook_editor_requires_login_and_csrf = 0.94 s = .
+HttpTest#test_unicode_filename_upload_and_invalid_file_rejection = 0.97 s = .
+HttpTest#test_real_multipart_upload_and_download = 0.84 s = .
+HttpTest#test_notebook_anonymous_export_denied = 0.44 s = .
+HttpTest#test_password_change_invalidates_other_authenticated_session = 2.08 s = .
+HttpTest#test_all_admin_screens_render = 0.91 s = .
+HttpTest#test_contact_requires_explicit_consent = 0.42 s = .
+HttpTest#test_login_rotates_and_logout_revokes_session = 0.89 s = .
+HttpTest#test_notebook_attachment_upload_and_export_zip = 0.86 s = .
+HttpTest#test_notebook_draft_detail_private_and_content_escaped = 0.87 s = .
+HttpTest#test_demo_removal_and_public_search = 0.92 s = .
+HttpTest#test_profile_update_and_resume_link = 0.87 s = .
+HttpTest#test_project_create_update_delete_through_http = 0.88 s = .
+HttpTest#test_inbox_read_delete_and_escaped_message = 0.85 s = .
+HttpTest#test_home_and_static_assets_load_without_authentication = 0.48 s = .
+HttpTest#test_contact_is_saved_not_emailed_and_honeypot_is_ignored = 0.45 s = .
+HttpTest#test_image_cover_visibility_and_file_deletion_through_http = 0.88 s = .
+HttpTest#test_notebook_five_pages_show_correct_sections = 0.43 s = .
+HttpTest#test_request_body_is_limited_and_host_is_checked = 0.42 s = .
+HttpTest#test_csrf_is_required_for_login = 0.51 s = .
+HttpTest#test_notebook_error_retains_form_values_and_rejects_invalid_section = 1.03 s = .
+HttpTest#test_draft_and_its_files_are_not_public = 0.98 s = .
+HttpTest#test_security_headers_and_cookie_flags = 0.49 s = .
+RackTest#test_duplicate_multipart_fields_are_rejected = 0.85 s = .
+RackTest#test_file_page_preselects_the_linked_project = 0.97 s = .
+RackTest#test_production_sets_secure_cookie_and_hsts = 0.53 s = .
+RackTest#test_password_change_invalidates_other_authenticated_session = 2.58 s = .
+RackTest#test_cross_origin_mutation_is_rejected = 0.83 s = .
+RackTest#test_project_body_is_html_escaped = 0.40 s = .
+RackTest#test_security_headers_and_cookie_flags = 0.40 s = .
+RackTest#test_unicode_filename_upload_and_invalid_file_rejection = 0.87 s = .
+RackTest#test_notebook_anonymous_export_denied = 0.42 s = .
+RackTest#test_private_admin_redirects_to_login = 0.43 s = .
+RackTest#test_all_admin_screens_render = 0.88 s = .
+RackTest#test_contact_requires_explicit_consent = 0.41 s = .
+RackTest#test_login_rotates_and_logout_revokes_session = 0.83 s = .
+RackTest#test_inbox_read_delete_and_escaped_message = 0.83 s = .
+RackTest#test_notebook_attachment_upload_and_export_zip = 0.82 s = .
+RackTest#test_notebook_draft_detail_private_and_content_escaped = 0.85 s = .
+RackTest#test_demo_removal_and_public_search = 0.98 s = .
+RackTest#test_profile_update_and_resume_link = 0.88 s = .
+RackTest#test_project_create_update_delete_through_http = 0.84 s = .
+RackTest#test_notebook_five_pages_show_correct_sections = 0.42 s = .
+RackTest#test_image_cover_visibility_and_file_deletion_through_http = 0.80 s = .
+RackTest#test_head_response_has_no_body = 0.41 s = .
+RackTest#test_contact_is_saved_not_emailed_and_honeypot_is_ignored = 0.40 s = .
+RackTest#test_home_and_static_assets_load_without_authentication = 0.40 s = .
+RackTest#test_notebook_error_retains_form_values_and_rejects_invalid_section = 0.92 s = .
+RackTest#test_request_body_is_limited_and_host_is_checked = 0.57 s = .
+RackTest#test_csrf_is_required_for_login = 0.42 s = .
+RackTest#test_notebook_editor_requires_login_and_csrf = 0.95 s = .
+RackTest#test_draft_and_its_files_are_not_public = 1.00 s = .
+RackTest#test_real_multipart_upload_and_download = 0.88 s = .
+CoreTest#test_project_validation_rejects_empty_title_and_unsafe_urls = 0.00 s = .
+CoreTest#test_uploaded_filename_is_not_a_storage_path = 0.00 s = .
+CoreTest#test_project_update_retains_id = 0.00 s = .
+CoreTest#test_admin_requires_a_long_password = 1.94 s = .
+CoreTest#test_draft_project_hides_even_public_attachments = 0.00 s = .
+CoreTest#test_password_is_salted_and_not_plaintext = 1.93 s = .
+CoreTest#test_private_file_cannot_be_accessed_publicly = 0.00 s = .
+CoreTest#test_upload_rejects_empty_binary_text_and_oversized_bytes = 0.00 s = .
+CoreTest#test_rate_limit_is_bounded = 0.00 s = .
+CoreTest#test_quota_is_checked_before_committing = 0.07 s = .
+CoreTest#test_message_validation_and_read_state = 0.00 s = .
+CoreTest#test_upload_accepts_valid_pdf = 0.00 s = .
+CoreTest#test_resume_is_only_a_public_pdf = 0.00 s = .
+CoreTest#test_drafts_are_hidden_and_search_is_case_insensitive = 0.00 s = .
+CoreTest#test_project_survives_reopening_store = 0.00 s = .
+CoreTest#test_profile_rejects_unsafe_link = 0.00 s = .
+CoreTest#test_demo_is_explicit_and_can_be_removed_without_deleting_real_work = 0.00 s = .
+CoreTest#test_project_delete_removes_attached_files = 0.00 s = .
+CoreTest#test_upload_rejects_executables_and_forged_pdf = 0.01 s = .
+CoreTest#test_image_cover_must_belong_to_project = 0.01 s = .
+CoreTest#test_session_rotation_invalidates_old_token = 0.00 s = .
+CoreTest#test_missing_project_does_not_leave_orphan_bytes = 0.00 s = .
 
-Finished in 17.568221s, 4.1552 runs/s, 28.1759 assertions/s.
+Finished in 59.116497s, 1.7762 runs/s, 13.2281 assertions/s.
 
-73 runs, 495 assertions, 0 failures, 0 errors, 0 skips
+105 runs, 782 assertions, 0 failures, 0 errors, 0 skips

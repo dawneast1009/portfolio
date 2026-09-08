@@ -1,0 +1,6 @@
+<div class="attachment-row">
+  <span class="file-type"><%= h(file['extension'].upcase) %></span>
+  <a class="attachment-name" href="<%= attachment_href(file) %>" download="<%= h(file['filename']) %>"><strong><%= h(file['label']) %></strong><small><%= h(file['filename']) %> · <%= human_size(file['size']) %></small></a>
+  <% if !file['public'] && editable? %><span class="tag">비공개</span><% end %>
+  <a class="icon-button" href="<%= attachment_href(file) %>" download="<%= h(file['filename']) %>" aria-label="<%= h(file['filename']) %> 다운로드"><%= icon('download') %></a>
+</div>

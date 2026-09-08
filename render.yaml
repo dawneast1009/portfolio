@@ -1,0 +1,36 @@
+# FREE PREVIEW ONLY. All edited content, uploads and accounts are lost on
+# restarts, redeploys or idle shutdown. Never store your only copy here.
+# In New > Blueprint, choose this file as the Blueprint Path.
+services:
+  - type: web
+    name: dawneast-portfolio-preview
+    runtime: ruby
+    plan: free
+    region: singapore
+    numInstances: 1
+    buildCommand: bundle install
+    startCommand: bundle exec ruby bin/render-start
+    autoDeployTrigger: commit
+    envVars:
+      - key: APP_ENV
+        value: production
+      - key: BIND
+        value: 0.0.0.0
+      - key: STORAGE_DIR
+        value: /tmp/portfolio-preview
+      - key: BUNDLE_DEPLOYMENT
+        value: "false"
+      - key: BUNDLE_FROZEN
+        value: "false"
+      - key: BUNDLE_WITHOUT
+        value: test
+      - key: ADMIN_USERNAME
+        value: admin
+      - key: ADMIN_PASSWORD
+        sync: false
+      - key: SEED_DEMO
+        value: "false"
+      - key: MAX_UPLOAD_MB
+        value: "10"
+      - key: MAX_STORAGE_MB
+        value: "100"

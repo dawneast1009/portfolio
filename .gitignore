@@ -1,0 +1,18 @@
+.env
+.env.*
+!.env.example
+storage/*
+!storage/.gitkeep
+vendor/
+.bundle/
+log/
+*.log
+.DS_Store
+Thumbs.db
+coverage/
+playwright-report/
+__pycache__/
+
+# Local static exports should be published explicitly, not committed with server source
+/submission/
+/submission-*/

@@ -41,7 +41,7 @@ module Portfolio
 
     def render(name)
       @content = partial(name)
-      partial(@path.start_with?('/admin') && @path != '/admin/login' && @admin ? 'admin/layout' : 'layout')
+      partial('notebook/layout')
     end
 
     def partial(name, locals = {})
@@ -89,6 +89,32 @@ module Portfolio
     end
 
     def skills = @profile['skills'].to_s.split(',').map(&:strip).reject(&:empty?)
+    def page_href(page)
+      @static ? (page == 'home' ? 'index.html' : "#{page}.html") : Notebook.path(page)
+    end
+    def asset_href(name) = @static ? "assets/#{name}" : "/assets/#{name}"
+    def entry_href(record) = @static ? "entry-#{record['id']}.html" : "/entry/#{record['id']}"
+    def attachment_href(record, preview: false)
+      @static ? "files/#{record['id']}.#{record['extension']}" : "/files/#{record['id']}/#{preview ? 'preview' : 'download'}"
+    end
+    def attached_files(record)
+      @repo.files.select { |f| f['project_id'] == record['id'] && (@admin || @repo.public_file?(f)) }
+    end
+    def entry_page(record) = Notebook.page_of(record)
+    def entry_section(record) = Notebook.section_of(record)
+    def notebook_records(page, section = nil)
+      records = @repo.notebook_entries(page, section:section, public_only:!@admin)
+      query = @filter_query.to_s.strip.downcase
+      query.empty? ? records : records.select { |record| [record['title'],record['body'],*record['tags']].join(' ').downcase.include?(query) }
+    end
+    def current_page
+      return @page_key if @page_key && Notebook::PAGES.key?(@page_key)
+      return 'home' if @path == '/' || @path == '/admin'
+      Notebook::PAGES.keys.find { |key| @path == "/#{key}" } || 'home'
+    end
+    def current_title = Notebook::PAGES[current_page][:title]
+    def editable? = @admin && !@static
+    def free_preview? = !@static && @config.storage_dir.include?('portfolio-preview')
     def nav_count = @repo.messages.count { |message| !message['read'] }
   end
 end

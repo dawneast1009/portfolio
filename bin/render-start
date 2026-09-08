@@ -1,0 +1,13 @@
+#!/usr/bin/env ruby
+# frozen_string_literal: true
+require_relative '../lib/portfolio/deployment'
+root = File.expand_path('..', __dir__)
+begin
+  Portfolio::Config.load_env(File.join(root, '.env'))
+  Portfolio::Deployment.prepare!(root: root)
+rescue ArgumentError, Portfolio::ValidationError => e
+  warn "배포 초기화 실패: #{e.message}"
+  exit 1
+end
+Dir.chdir(root)
+exec('bundle', 'exec', 'puma', '-C', 'config/puma.rb')

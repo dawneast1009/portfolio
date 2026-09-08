@@ -1,227 +1,142 @@
-{
-  "method": "Actual local HTTP response HTML rendered offline with its original CSS/JS. Browser URL navigation is unavailable in this environment; HTTP mutations are verified separately.",
-  "viewports": [
-    {
-      "path": "/",
-      "width": 360,
-      "scroll": 360
-    },
-    {
-      "path": "/projects",
-      "width": 360,
-      "scroll": 360
-    },
-    {
-      "path": "/files",
-      "width": 360,
-      "scroll": 360
-    },
-    {
-      "path": "/about",
-      "width": 360,
-      "scroll": 360
-    },
-    {
-      "path": "/contact",
-      "width": 360,
-      "scroll": 360
-    },
-    {
-      "path": "/admin",
-      "width": 360,
-      "scroll": 360
-    },
-    {
-      "path": "/admin/files",
-      "width": 360,
-      "scroll": 360
-    },
-    {
-      "path": "/admin/projects/new",
-      "width": 360,
-      "scroll": 360
-    },
-    {
-      "path": "/admin/profile",
-      "width": 360,
-      "scroll": 360
-    },
-    {
-      "path": "/admin/inbox",
-      "width": 360,
-      "scroll": 360
-    },
-    {
-      "path": "/admin/security",
-      "width": 360,
-      "scroll": 360
-    },
-    {
-      "path": "/",
-      "width": 390,
-      "scroll": 390
-    },
-    {
-      "path": "/projects",
-      "width": 390,
-      "scroll": 390
-    },
-    {
-      "path": "/files",
-      "width": 390,
-      "scroll": 390
-    },
-    {
-      "path": "/about",
-      "width": 390,
-      "scroll": 390
-    },
-    {
-      "path": "/contact",
-      "width": 390,
-      "scroll": 390
-    },
-    {
-      "path": "/admin",
-      "width": 390,
-      "scroll": 390
-    },
-    {
-      "path": "/admin/files",
-      "width": 390,
-      "scroll": 390
-    },
-    {
-      "path": "/admin/projects/new",
-      "width": 390,
-      "scroll": 390
-    },
-    {
-      "path": "/admin/profile",
-      "width": 390,
-      "scroll": 390
-    },
-    {
-      "path": "/admin/inbox",
-      "width": 390,
-      "scroll": 390
-    },
-    {
-      "path": "/admin/security",
-      "width": 390,
-      "scroll": 390
-    },
-    {
-      "path": "/",
-      "width": 768,
-      "scroll": 768
-    },
-    {
-      "path": "/projects",
-      "width": 768,
-      "scroll": 768
-    },
-    {
-      "path": "/files",
-      "width": 768,
-      "scroll": 768
-    },
-    {
-      "path": "/about",
-      "width": 768,
-      "scroll": 768
-    },
-    {
-      "path": "/contact",
-      "width": 768,
-      "scroll": 768
-    },
-    {
-      "path": "/admin",
-      "width": 768,
-      "scroll": 768
-    },
-    {
-      "path": "/admin/files",
-      "width": 768,
-      "scroll": 768
-    },
-    {
-      "path": "/admin/projects/new",
-      "width": 768,
-      "scroll": 768
-    },
-    {
-      "path": "/admin/profile",
-      "width": 768,
-      "scroll": 768
-    },
-    {
-      "path": "/admin/inbox",
-      "width": 768,
-      "scroll": 768
-    },
-    {
-      "path": "/admin/security",
-      "width": 768,
-      "scroll": 768
-    },
-    {
-      "path": "/",
-      "width": 1440,
-      "scroll": 1440
-    },
-    {
-      "path": "/projects",
-      "width": 1440,
-      "scroll": 1440
-    },
-    {
-      "path": "/files",
-      "width": 1440,
-      "scroll": 1440
-    },
-    {
-      "path": "/about",
-      "width": 1440,
-      "scroll": 1440
-    },
-    {
-      "path": "/contact",
-      "width": 1440,
-      "scroll": 1440
-    },
-    {
-      "path": "/admin",
-      "width": 1440,
-      "scroll": 1440
-    },
-    {
-      "path": "/admin/files",
-      "width": 1440,
-      "scroll": 1440
-    },
-    {
-      "path": "/admin/projects/new",
-      "width": 1440,
-      "scroll": 1440
-    },
-    {
-      "path": "/admin/profile",
-      "width": 1440,
-      "scroll": 1440
-    },
-    {
-      "path": "/admin/inbox",
-      "width": 1440,
-      "scroll": 1440
-    },
-    {
-      "path": "/admin/security",
-      "width": 1440,
-      "scroll": 1440
-    }
-  ],
-  "overflow": [],
-  "javascript_errors": []
-}
+[
+  {
+    "width": 360,
+    "route": "/",
+    "status": 200,
+    "mode": "offline-render",
+    "horizontal_overflow": false
+  },
+  {
+    "width": 360,
+    "route": "/about",
+    "status": 200,
+    "mode": "offline-render",
+    "horizontal_overflow": false
+  },
+  {
+    "width": 360,
+    "route": "/career",
+    "status": 200,
+    "mode": "offline-render",
+    "horizontal_overflow": false
+  },
+  {
+    "width": 360,
+    "route": "/activities",
+    "status": 200,
+    "mode": "offline-render",
+    "horizontal_overflow": false
+  },
+  {
+    "width": 360,
+    "route": "/projects",
+    "status": 200,
+    "mode": "offline-render",
+    "horizontal_overflow": false
+  },
+  {
+    "width": 390,
+    "route": "/",
+    "status": 200,
+    "mode": "offline-render",
+    "horizontal_overflow": false
+  },
+  {
+    "width": 390,
+    "route": "/about",
+    "status": 200,
+    "mode": "offline-render",
+    "horizontal_overflow": false
+  },
+  {
+    "width": 390,
+    "route": "/career",
+    "status": 200,
+    "mode": "offline-render",
+    "horizontal_overflow": false
+  },
+  {
+    "width": 390,
+    "route": "/activities",
+    "status": 200,
+    "mode": "offline-render",
+    "horizontal_overflow": false
+  },
+  {
+    "width": 390,
+    "route": "/projects",
+    "status": 200,
+    "mode": "offline-render",
+    "horizontal_overflow": false
+  },
+  {
+    "width": 768,
+    "route": "/",
+    "status": 200,
+    "mode": "offline-render",
+    "horizontal_overflow": false
+  },
+  {
+    "width": 768,
+    "route": "/about",
+    "status": 200,
+    "mode": "offline-render",
+    "horizontal_overflow": false
+  },
+  {
+    "width": 768,
+    "route": "/career",
+    "status": 200,
+    "mode": "offline-render",
+    "horizontal_overflow": false
+  },
+  {
+    "width": 768,
+    "route": "/activities",
+    "status": 200,
+    "mode": "offline-render",
+    "horizontal_overflow": false
+  },
+  {
+    "width": 768,
+    "route": "/projects",
+    "status": 200,
+    "mode": "offline-render",
+    "horizontal_overflow": false
+  },
+  {
+    "width": 1440,
+    "route": "/",
+    "status": 200,
+    "mode": "offline-render",
+    "horizontal_overflow": false
+  },
+  {
+    "width": 1440,
+    "route": "/about",
+    "status": 200,
+    "mode": "offline-render",
+    "horizontal_overflow": false
+  },
+  {
+    "width": 1440,
+    "route": "/career",
+    "status": 200,
+    "mode": "offline-render",
+    "horizontal_overflow": false
+  },
+  {
+    "width": 1440,
+    "route": "/activities",
+    "status": 200,
+    "mode": "offline-render",
+    "horizontal_overflow": false
+  },
+  {
+    "width": 1440,
+    "route": "/projects",
+    "status": 200,
+    "mode": "offline-render",
+    "horizontal_overflow": false
+  }
+]

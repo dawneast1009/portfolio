@@ -5,9 +5,11 @@ require 'digest'
 require_relative 'security'
 require_relative 'store'
 require_relative 'uploads'
+require_relative 'notebook'
 
 module Portfolio
   class Repository
+    include NotebookRepository
     CATEGORIES = { 'development' => '개발', 'security' => '보안', 'research' => '기록', 'design' => '디자인', 'other' => '기타' }.freeze
     attr_reader :max_upload_bytes, :max_storage_bytes
 
@@ -91,6 +93,9 @@ module Portfolio
         'year' => text(input, 'year', max: 4),
         'demo' => demo
       }
+      if input.key?('notebook_page')
+        data.merge!(Notebook.validate(input['notebook_page'], input['notebook_section'], input['level']))
+      end
       data['year'] = Time.now.year.to_s if data['year'].empty?
       raise ValidationError, '연도는 네 자리 숫자로 입력해 주세요' unless data['year'].match?(/\A\d{4}\z/)
       raise ValidationError, '올바른 카테고리를 선택해 주세요' unless CATEGORIES.key?(data['category'])
@@ -98,6 +103,7 @@ module Portfolio
       @store.update do |state|
         old = id ? state['projects'][id] : nil
         raise NotFound, '프로젝트를 찾을 수 없습니다' if id && !old
+        data.merge!(old.slice('notebook_page', 'notebook_section', 'level')) if old && !input.key?('notebook_page')
         project_id = id || SecureRandom.hex(12)
         cover_id = input.key?('cover_id') ? input['cover_id'].to_s : old&.fetch('cover_id', nil)
         unless cover_id.to_s.empty?

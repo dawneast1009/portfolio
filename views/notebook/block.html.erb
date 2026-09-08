@@ -1,0 +1,7 @@
+<article class="record-block">
+  <div class="record-heading"><a class="record-title" href="<%= entry_href(record) %>"><%= icon('file') %><h3><%= h(record['title']) %></h3></a><div class="record-flags"><% if record['demo'] %><span class="tag example">예시</span><% end %><% if record['status'] != 'published' %><span class="tag">비공개</span><% end %><% unless record['level'].to_s.empty? %><span class="tag level"><%= h(Notebook::LEVELS[record['level']]) %> · 자기평가</span><% end %><% if editable? %><a class="edit-link" href="/admin/notebook/<%= record['id'] %>/edit" aria-label="<%= h(record['title']) %> 편집"><%= icon('edit') %></a><% end %></div></div>
+  <% unless record['body'].to_s.empty? %><div class="prose block-excerpt"><%= paragraphs(record['body']) %></div><% end %>
+  <% unless record['live_url'].to_s.empty? %><a class="record-link" href="<%= h(record['live_url']) %>" target="_blank" rel="noopener noreferrer"><%= icon('external') %><%= h(record['live_url']) %></a><% end %>
+  <% attached_files(record).each do |file| %><%= partial('notebook/attachment',file:file) %><% end %>
+  <a class="open-record" href="<%= entry_href(record) %>">기록 전체 보기 <%= icon('arrow') %></a>
+</article>

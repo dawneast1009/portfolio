@@ -31,6 +31,7 @@ module Portfolio
   class RequestContext
     ASSETS = { '/assets/site.css' => ['site.css', 'text/css; charset=utf-8'],
       '/assets/app.js' => ['app.js', 'application/javascript; charset=utf-8'],
+      '/assets/notebook.css' => ['notebook.css', 'text/css; charset=utf-8'],
       '/assets/favicon.svg' => ['favicon.svg', 'image/svg+xml'] }.freeze
     ID = '[0-9a-f]{24}'
 
@@ -139,7 +140,7 @@ module Portfolio
     end
 
     def parse_body
-      limit = @path == '/admin/files' ? @config.max_upload_bytes + 2 * 1024 * 1024 : 256 * 1024
+      limit = %w[/admin/files /admin/notebook-upload].include?(@path) ? @config.max_upload_bytes + 2 * 1024 * 1024 : 256 * 1024
       raise HTTPError.new(413, '요청 용량 제한을 초과했습니다') if @req.content_length.to_i > limit
       body = +''.b
       @req.body do |chunk|
@@ -150,7 +151,7 @@ module Portfolio
       if type.start_with?('application/x-www-form-urlencoded')
         return parse_pairs(body, max_bytes: limit)
       end
-      unless @path == '/admin/files' && type.start_with?('multipart/form-data')
+      unless %w[/admin/files /admin/notebook-upload].include?(@path) && type.start_with?('multipart/form-data')
         raise HTTPError.new(415, '지원하지 않는 요청 형식입니다')
       end
       match = type.match(/boundary=(?:"([^"]+)"|([^;\s]+))/)
@@ -393,3 +394,5 @@ module Portfolio
     def remote_ip = @req.peeraddr[3]
   end
 end
+
+require_relative 'notebook_routes'

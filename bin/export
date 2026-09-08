@@ -1,0 +1,23 @@
+#!/usr/bin/env ruby
+# frozen_string_literal: true
+require 'fileutils'
+require_relative '../lib/portfolio/static_export'
+root = File.expand_path('..',__dir__)
+begin
+  abort('사용법: ruby bin/export [새로 만들 출력 폴더]') if ARGV.length > 1
+  Portfolio::Config.load_env(File.join(root,'.env'))
+  config = Portfolio::Config.new(root:root)
+  repo = Portfolio::Repository.new(config.storage_dir,max_upload_bytes:config.max_upload_bytes,max_storage_bytes:config.max_storage_bytes)
+  destination = File.expand_path(ARGV.first || File.join(root,'submission'))
+  raise ArgumentError, '출력 폴더가 이미 있습니다. 기존 자료를 보존하기 위해 다른 이름을 지정해 주세요' if File.exist?(destination)
+  output = Portfolio::StaticExport.new(config:config,repository:repo).entries
+  FileUtils.mkdir_p(destination)
+  output.each do |name,bytes|
+    path = File.join(destination,name)
+    FileUtils.mkdir_p(File.dirname(path))
+    File.binwrite(path,bytes)
+  end
+  puts "제출용 사이트: #{destination}\n공개 기록·공개 첨부파일만 내보냈습니다. 이 폴더의 내용을 정적 사이트로 배포하세요."
+rescue ArgumentError,Portfolio::ValidationError => e
+  abort(e.message)
+end
