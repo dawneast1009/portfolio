@@ -1,0 +1,10 @@
+<article class="project-card">
+  <a class="project-cover cover-<%= h(project['category']) %>" href="/projects/<%= h(project['id']) %>" aria-label="<%= h(project['title']) %> 상세 보기">
+    <% if (cover = cover_file(project)) %><img src="/files/<%= h(cover['id']) %>/preview" alt="<%= h(project['title']) %> 대표 이미지" loading="lazy"><% else %><%= partial('project_art', project: project) %><% end %>
+    <% if project['demo'] %><span class="sample-label">SAMPLE PROJECT</span><% end %>
+  </a>
+  <div class="project-meta"><span><%= h(category(project['category'])) %><span class="meta-separator">/</span><%= h(project['year']) %></span><% if project['featured'] %><span class="featured-label">SELECTED</span><% end %></div>
+  <h3><a href="/projects/<%= h(project['id']) %>"><%= h(project['title']) %><%= icon('external') %></a></h3>
+  <p class="project-summary"><%= h(project['summary']) %></p>
+  <div class="tags"><% project['tags'].each do |tag| %><a href="/projects?tag=<%= q(tag) %>"><%= h(tag) %></a><% end %></div>
+</article>

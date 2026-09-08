@@ -1,0 +1,72 @@
+#!/usr/bin/env ruby
+# frozen_string_literal: true
+require 'optparse'
+require 'io/console'
+require_relative '../lib/portfolio/config'
+require_relative '../lib/portfolio/repository'
+
+options = { demo: false, reset: false, stdin: false, username: nil }
+parser = OptionParser.new do |opts|
+  opts.banner = 'Usage: ruby bin/setup [--demo] [--username NAME] [--reset-password]'
+  opts.on('--demo', '처음 실행할 때 샘플 프로젝트를 추가합니다') { options[:demo] = true }
+  opts.on('--username NAME', '관리자 아이디를 지정합니다 (기본값 admin)') { |v| options[:username] = v }
+  opts.on('--reset-password', '기존 관리자 비밀번호만 재설정합니다') { options[:reset] = true }
+  opts.on('--password-stdin', '자동화용: 표준 입력에서 비밀번호와 확인 값을 두 줄로 읽습니다') { options[:stdin] = true }
+  opts.on('-h', '--help', '도움말') { puts opts; exit }
+end
+
+begin
+  parser.parse!
+  raise ArgumentError, '알 수 없는 인수가 있습니다' unless ARGV.empty?
+  root = File.expand_path('..', __dir__)
+  Portfolio::Config.load_env(File.join(root, '.env'))
+  config = Portfolio::Config.new(root: root)
+  repo = Portfolio::Repository.new(config.storage_dir, max_upload_bytes: config.max_upload_bytes,
+    max_storage_bytes: config.max_storage_bytes)
+  existing = repo.admin
+  if existing && !options[:reset]
+    repo.seed_demo if options[:demo]
+    puts '관리자 계정이 이미 있습니다. 계정과 비밀번호는 변경하지 않았습니다.'
+    puts '비밀번호 재설정: ruby bin/setup --reset-password'
+    exit
+  end
+  raise ArgumentError, '먼저 관리자 계정을 생성해 주세요. --reset-password 없이 실행하면 됩니다' if options[:reset] && !existing
+  unless options[:stdin] || $stdin.tty?
+    raise ArgumentError, '터미널에서 실행해 주세요. 자동화할 때만 --password-stdin을 명시적으로 사용하세요'
+  end
+  username = existing ? existing['username'] : options[:username]
+  unless username
+    if options[:stdin]
+      username = 'admin'
+    else
+      print '관리자 아이디 [admin]: '
+      $stdout.flush
+      username = $stdin.gets&.strip
+      raise ArgumentError, '입력이 종료되었습니다' unless username
+      username = 'admin' if username.empty?
+    end
+  end
+  read_password = lambda do |prompt|
+    print prompt unless options[:stdin]
+    $stdout.flush
+    value = options[:stdin] ? $stdin.gets : $stdin.noecho(&:gets)
+    puts unless options[:stdin]
+    raise ArgumentError, '비밀번호 입력이 종료되었습니다' unless value
+    value.chomp
+  end
+  puts '비밀번호는 15자 이상으로 입력하세요. 입력한 문자는 화면에 표시되지 않습니다.' unless options[:stdin]
+  password = read_password.call('새 비밀번호: ')
+  confirmation = read_password.call('비밀번호 확인: ')
+  raise ArgumentError, '비밀번호 확인 값이 일치하지 않습니다' unless password == confirmation
+  repo.setup_admin(username, password, reset: options[:reset])
+  repo.seed_demo if options[:demo]
+  puts(options[:reset] ? '관리자 비밀번호를 재설정했습니다.' : '관리자 계정을 생성했습니다.')
+  puts '샘플 프로젝트는 관리자 대시보드에서 삭제하거나 수정할 수 있습니다.' if options[:demo]
+  puts "실행: ruby app.rb\n사이트: #{config.app_url}\n관리자: #{config.app_url}/admin"
+rescue OptionParser::ParseError, ArgumentError, Portfolio::ValidationError => e
+  warn "설정 실패: #{e.message}"
+  exit 1
+rescue Interrupt
+  warn "\n설정을 취소했습니다."
+  exit 130
+end
