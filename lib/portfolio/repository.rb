@@ -72,7 +72,7 @@ module Portfolio
         raise NotFound, '상위 메뉴를 찾을 수 없습니다' unless item
         raise ValidationError, '홈 메뉴는 삭제할 수 없습니다' if item['id'] == 'home'
         if state['projects'].values.any? { |record| Notebook.page_of(record, navigation) == item['id'] }
-          raise ValidationError, '연결된 기록이 있어 메뉴를 삭제할 수 없습니다. 기록을 먼저 이동하거나 삭제해 주세요'
+          raise ValidationError, '연결된 기록이 있어 메뉴를 삭제할 수 없습니다. 기록을 먼저 삭제해 주세요'
         end
         navigation.delete(item)
         copy_value(item)

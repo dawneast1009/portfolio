@@ -47,7 +47,7 @@ Gemfile의 공개 배포용 조건은 그대로 유지했습니다: WEBrick >= 1
 
 ## 2026-09-09 목차 편집 검증
 
-`ruby bin/test`: 121 runs, 954 assertions, 0 failures, 0 errors, 0 skips
+`ruby bin/test`: 121 runs, 957 assertions, 0 failures, 0 errors, 0 skips
 
 관리자 목차 편집 기능은 저장소 계층과 실제 HTTP 요청 양쪽에서 검증했습니다. 기존 다섯 메뉴를 유지하는 이전 데이터 호환, 상위 메뉴·하위 항목 추가 및 이름 변경, 순서 이동, 빈 항목 삭제, 기록이 연결된 항목의 삭제 차단, 홈 삭제 차단, 입력 길이·아이콘·개수 제한을 확인했습니다.
 

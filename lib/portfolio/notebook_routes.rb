@@ -5,6 +5,7 @@ module Portfolio
   # Reuse the original request/session/parser boundary; only school UI routes change.
   module NotebookRoutes
     NAVIGATION_ID = '[a-z0-9-]{1,40}'
+    LEGACY_NOTEBOOK_PATHS = %w[/about /career /activities /projects].freeze
 
     private
     def dispatch_get
@@ -40,6 +41,8 @@ module Portfolio
         raise NotFound unless record && (record['status'] == 'published' || @authenticated)
         render('notebook/entry',title:record['title'],record:record,
           page_key:Notebook.page_of(record, navigation))
+      when *LEGACY_NOTEBOOK_PATHS
+        raise NotFound
       else
         super
       end

@@ -48,13 +48,6 @@ module Portfolio
         ] }
     ])
 
-    # Compatibility for templates while runtime consumers migrate to the stored tree.
-    PAGES = DEFAULT_NAVIGATION.to_h do |page_record|
-      sections = page_record['sections'].to_h { |item| [item['id'],item['title']] }.freeze
-      [page_record['id'], { title:page_record['title'], icon:page_record['icon'],
-        description:page_record['description'], sections:sections }.freeze]
-    end.freeze
-
     module_function
 
     def default_navigation = Marshal.load(Marshal.dump(DEFAULT_NAVIGATION))

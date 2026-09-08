@@ -6,7 +6,7 @@
 </header>
 <% if @page_key == 'home' %>
   <section class="home-guide" aria-labelledby="index-title"><h2 id="index-title">포트폴리오 둘러보기</h2><div class="page-index">
-    <% notebook_pages.reject { |item| item['id'] == 'home' }.each_with_index do |item,index| %>
+    <% notebook_pages.reject { |item| item['id'] == 'home' }.each do |item| %>
     <a href="<%= page_href(item['id']) %>" class="index-row"><span class="index-icon"><%= icon(item['icon']) %></span><span class="index-copy"><strong><%= h(item['title']) %></strong><small><%= h(item['sections'].first(3).map { |section| section['title'] }.join(' · ')) %></small></span><%= icon('arrow') %></a>
     <% end %>
   </div></section>

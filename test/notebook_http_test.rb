@@ -83,6 +83,8 @@ class HttpTest
     assert_equal '200', response.code
     assert_includes response.body.force_encoding('UTF-8'), '나에 대하여'
     assert_equal '404', request('GET','/page-000000000000',cookie:false).code
+    @repo.delete_notebook_page('about')
+    assert_equal '404', request('GET','/about',cookie:false).code
   end
 
   def test_notebook_five_pages_show_correct_sections
