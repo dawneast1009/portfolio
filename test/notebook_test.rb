@@ -133,6 +133,9 @@ class NotebookTest < Minitest::Test
     pub = @repo.add_file(filename:'자료.txt',bytes:'public file',project_id:item['id'],public:true)
     @repo.add_file(filename:'숨김.txt',bytes:'PRIVATE_FILE_MARKER',project_id:item['id'],public:false)
     @repo.add_file(filename:'초안.txt',bytes:'DRAFT_FILE_MARKER',project_id:secret['id'],public:true)
+    custom_page = @repo.save_notebook_page({'title'=>'수상','description'=>'도전의 결과','icon'=>'folder'})
+    custom_section = @repo.save_notebook_section(custom_page['id'], {'title'=>'교내 수상'})
+    custom = entry('title'=>'공개 수상 기록','page'=>custom_page['id'],'section'=>custom_section['id'])
     assert defined?(Portfolio::StaticExport), '정적 내보내기가 구현되지 않았습니다'
     cfg = Portfolio::Config.new(root:File.expand_path('..',__dir__),env:{'STORAGE_DIR'=>@dir})
     output = Portfolio::StaticExport.new(config:cfg, repository:@repo).entries
@@ -144,5 +147,10 @@ class NotebookTest < Minitest::Test
     assert_includes output['index.html'], 'href="about.html"'
     assert_includes output['about.html'], "entry-#{item['id']}.html"
     refute_match(/(?:href|src)="\/(?!\/)/, output['about.html'])
+    assert output.key?("#{custom_page['id']}.html")
+    assert_includes output['index.html'], '수상'
+    assert_includes output["#{custom_page['id']}.html"], '교내 수상'
+    assert_includes output["#{custom_page['id']}.html"], "entry-#{custom['id']}.html"
+    refute_match(/href="\/(?!\/)/, output["#{custom_page['id']}.html"])
   end
 end

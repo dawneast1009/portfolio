@@ -12,15 +12,17 @@ module Portfolio
       records = state['projects'].values.select { |r| r['status'] == 'published' }
       ids = records.map { |r| r['id'] }
       attachments = state['files'].values.select { |f| f['public'] && (ids.include?(f['project_id']) || (f['id'] == state['profile']['resume_id'] && public_in_state?(f,state))) }
-      { profile:state['profile'], projects:records, files:attachments }
+      { profile:state['profile'], projects:records, files:attachments,
+        navigation:state['notebook_navigation'] || Notebook.default_navigation }
     end
   end
 
   class PublicNotebookSnapshot
     include NotebookRepository
-    attr_reader :profile, :projects, :files
+    attr_reader :profile, :projects, :files, :notebook_navigation
     def initialize(snapshot)
       @profile, @projects, @files = snapshot.values_at(:profile,:projects,:files)
+      @notebook_navigation = snapshot.fetch(:navigation)
       @file_index = @files.to_h { |f| [f['id'],f] }
     end
     def file(id) = @file_index[id]
@@ -38,13 +40,14 @@ module Portfolio
       raise ValidationError, '내보낼 파일은 합계 64 MiB 이하로 줄여 주세요' if source.files.sum { |f| f['size'] } > MAX_BYTES
       raise ValidationError, '한 번에 내보낼 수 있는 기록은 2,000개입니다' if source.projects.size > 2000
       output = {}
-      Notebook::PAGES.each do |key, page|
-        name = key == 'home' ? 'index.html' : "#{key}.html"
-        output[name] = render(source,'notebook/page',Notebook.path(key),page[:title],page_key:key)
+      source.notebook_navigation.each do |page|
+        page_id = page['id']
+        name = page_id == 'home' ? 'index.html' : "#{page_id}.html"
+        output[name] = render(source,'notebook/page',Notebook.path(page_id),page['title'],page_key:page_id)
       end
       source.projects.each do |record|
         output["entry-#{record['id']}.html"] = render(source,'notebook/entry',"/entry/#{record['id']}",record['title'],
-          record:record,page_key:Notebook.page_of(record))
+          record:record,page_key:Notebook.page_of(record, source.notebook_navigation))
       end
       source.files.each do |file|
         path = @repository.file_path(file)
