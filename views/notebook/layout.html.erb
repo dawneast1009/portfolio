@@ -22,6 +22,7 @@
   </nav>
   <div class="sidebar-bottom">
     <% if editable? %>
+    <a class="side-link" href="/admin/navigation"><%= icon('grid') %><span>목차 편집</span></a>
     <a class="side-link" href="/admin/profile"><%= icon('user') %><span>기본 정보 수정</span></a>
     <a class="side-link" href="/admin/share"><%= icon('external') %><span>공유 및 제출</span></a>
     <a class="side-link" href="/admin/security"><%= icon('lock') %><span>비밀번호 변경</span></a>

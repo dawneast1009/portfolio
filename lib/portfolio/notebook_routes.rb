@@ -4,6 +4,8 @@ require_relative 'static_export'
 module Portfolio
   # Reuse the original request/session/parser boundary; only school UI routes change.
   module NotebookRoutes
+    NAVIGATION_ID = '[a-z0-9-]{1,40}'
+
     private
     def dispatch_get
       page = Notebook::PAGES.keys.find { |key| Notebook.path(key) == @path }
@@ -13,6 +15,8 @@ module Portfolio
         render_notebook_page('home')
       when '/admin/share'
         render('notebook/share', title:'공유 및 제출', page_key:'home')
+      when '/admin/navigation'
+        render_navigation_manager
       when '/admin/export.zip'
         @res.body = StaticExport.new(config:@config, repository:@repo).archive
         @res['Content-Type'] = 'application/zip'
@@ -38,6 +42,49 @@ module Portfolio
 
     def dispatch_post
       case @path
+      when '/admin/navigation/pages'
+        navigation_action do
+          @repo.save_notebook_page(@params)
+          redirect('/admin/navigation', '새 상위 메뉴를 추가했습니다')
+        end
+      when %r{\A/admin/navigation/pages/(#{NAVIGATION_ID})\z}
+        navigation_action do
+          @repo.save_notebook_page(@params, id:Regexp.last_match(1))
+          redirect('/admin/navigation', '상위 메뉴를 수정했습니다')
+        end
+      when %r{\A/admin/navigation/pages/(#{NAVIGATION_ID})/move\z}
+        navigation_action do
+          @repo.move_notebook_page(Regexp.last_match(1), @params['direction'])
+          redirect('/admin/navigation', '상위 메뉴 순서를 변경했습니다')
+        end
+      when %r{\A/admin/navigation/pages/(#{NAVIGATION_ID})/delete\z}
+        navigation_action do
+          @repo.delete_notebook_page(Regexp.last_match(1))
+          redirect('/admin/navigation', '상위 메뉴를 삭제했습니다')
+        end
+      when %r{\A/admin/navigation/pages/(#{NAVIGATION_ID})/sections\z}
+        navigation_action do
+          @repo.save_notebook_section(Regexp.last_match(1), @params)
+          redirect('/admin/navigation', '새 하위 항목을 추가했습니다')
+        end
+      when %r{\A/admin/navigation/pages/(#{NAVIGATION_ID})/sections/(#{NAVIGATION_ID})\z}
+        page_id, section_id = Regexp.last_match.captures
+        navigation_action do
+          @repo.save_notebook_section(page_id, @params, id:section_id)
+          redirect('/admin/navigation', '하위 항목 이름을 수정했습니다')
+        end
+      when %r{\A/admin/navigation/pages/(#{NAVIGATION_ID})/sections/(#{NAVIGATION_ID})/move\z}
+        page_id, section_id = Regexp.last_match.captures
+        navigation_action do
+          @repo.move_notebook_section(page_id, section_id, @params['direction'])
+          redirect('/admin/navigation', '하위 항목 순서를 변경했습니다')
+        end
+      when %r{\A/admin/navigation/pages/(#{NAVIGATION_ID})/sections/(#{NAVIGATION_ID})/delete\z}
+        page_id, section_id = Regexp.last_match.captures
+        navigation_action do
+          @repo.delete_notebook_section(page_id, section_id)
+          redirect('/admin/navigation', '하위 항목을 삭제했습니다')
+        end
       when '/admin/notebook' then save_notebook_entry
       when %r{\A/admin/notebook/(#{RequestContext::ID})\z}
         save_notebook_entry(Regexp.last_match(1))
@@ -61,6 +108,17 @@ module Portfolio
 
     def render_notebook_page(page)
       render('notebook/page', title:Notebook::PAGES.fetch(page)[:title], page_key:page, filter_query:@query['q'].to_s)
+    end
+
+    def render_navigation_manager(error: nil, status: 200)
+      render('admin/navigation', title:'목차 관리', page_key:'home', navigation:@repo.notebook_navigation,
+        error:error, status:status)
+    end
+
+    def navigation_action
+      yield
+    rescue ValidationError => e
+      render_navigation_manager(error:e.message, status:422)
     end
 
     def entry_form_values(record)

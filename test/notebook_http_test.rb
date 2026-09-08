@@ -2,6 +2,61 @@
 require_relative 'http_test'
 
 class HttpTest
+  def test_navigation_manager_requires_login_and_csrf
+    assert_equal '303', request('GET','/admin/navigation').code
+    token = login
+    page = request('GET','/admin/navigation')
+    assert_equal '200', page.code
+    assert_includes page.body.force_encoding('UTF-8'), '내 소개'
+    denied = request('POST','/admin/navigation/pages', form:{'title'=>'수상','description'=>'','icon'=>'folder'})
+    assert_equal '403', denied.code
+    created = request('POST','/admin/navigation/pages', form:{'_csrf'=>token,'title'=>'수상','description'=>'받은 상','icon'=>'folder'})
+    assert_equal '303', created.code
+    assert @repo.notebook_navigation.any? { |item| item['title'] == '수상' }
+  end
+
+  def test_navigation_manager_updates_moves_and_deletes_empty_items
+    token = login
+    page = @repo.save_notebook_page({'title'=>'수상','description'=>'','icon'=>'folder'})
+    updated = request('POST',"/admin/navigation/pages/#{page['id']}",
+      form:{'_csrf'=>token,'title'=>'수상 및 자격','description'=>'도전의 결과','icon'=>'file'})
+    assert_equal '303', updated.code
+    assert_equal '수상 및 자격', Portfolio::Notebook.page(@repo.notebook_navigation,page['id'])['title']
+
+    created = request('POST',"/admin/navigation/pages/#{page['id']}/sections",
+      form:{'_csrf'=>token,'title'=>'교내 수상'})
+    assert_equal '303', created.code
+    first = Portfolio::Notebook.page(@repo.notebook_navigation,page['id'])['sections'].first
+    second = @repo.save_notebook_section(page['id'], {'title'=>'교외 수상'})
+    moved = request('POST',"/admin/navigation/pages/#{page['id']}/sections/#{second['id']}/move",
+      form:{'_csrf'=>token,'direction'=>'up'})
+    assert_equal '303', moved.code
+    assert_equal second['id'], Portfolio::Notebook.page(@repo.notebook_navigation,page['id'])['sections'].first['id']
+
+    renamed = request('POST',"/admin/navigation/pages/#{page['id']}/sections/#{first['id']}",
+      form:{'_csrf'=>token,'title'=>'학교 수상'})
+    assert_equal '303', renamed.code
+    assert_equal '학교 수상', Portfolio::Notebook.section(Portfolio::Notebook.page(@repo.notebook_navigation,page['id']),first['id'])['title']
+    assert_equal '303', request('POST',"/admin/navigation/pages/#{page['id']}/sections/#{first['id']}/delete",
+      form:{'_csrf'=>token}).code
+    assert_equal '303', request('POST',"/admin/navigation/pages/#{page['id']}/move",
+      form:{'_csrf'=>token,'direction'=>'up'}).code
+    assert_equal '303', request('POST',"/admin/navigation/pages/#{page['id']}/delete", form:{'_csrf'=>token}).code
+    refute Portfolio::Notebook.page(@repo.notebook_navigation,page['id'])
+  end
+
+  def test_navigation_manager_renders_deletion_errors_without_losing_records
+    token = login
+    record = @repo.save_entry({'title'=>'강점 기록','body'=>'내용','page'=>'about','section'=>'strengths','status'=>'published','level'=>''})
+    blocked = request('POST','/admin/navigation/pages/about/sections/strengths/delete', form:{'_csrf'=>token})
+    assert_equal '422', blocked.code
+    assert_includes blocked.body.force_encoding('UTF-8'), '연결된 기록'
+    assert_equal record['id'], @repo.notebook_entries('about',section:'strengths').first['id']
+    home = request('POST','/admin/navigation/pages/home/delete', form:{'_csrf'=>token})
+    assert_equal '422', home.code
+    assert_includes home.body.force_encoding('UTF-8'), '홈 메뉴는 삭제할 수 없습니다'
+  end
+
   def test_notebook_five_pages_show_correct_sections
     { '/' => '포트폴리오', '/about'=>'가치관', '/career'=>'관심 직업', '/activities'=>'사용 프로그램 및 숙련도', '/projects'=>'주제탐구보고서' }.each do |path, text|
       response = request('GET', path)

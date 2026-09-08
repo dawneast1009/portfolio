@@ -1,7 +1,7 @@
 <% page = Notebook::PAGES.fetch(@page_key) %>
 <header class="page-heading">
   <div class="page-symbol"><%= icon(page[:icon]) %></div>
-  <div class="heading-row"><h1><%= h(@page_key == 'home' ? @profile['headline'] : page[:title]) %></h1><% if editable? && @page_key == 'home' %><a class="button quiet" href="/admin/profile"><%= icon('edit') %>소개 수정</a><% end %></div>
+  <div class="heading-row"><h1><%= h(@page_key == 'home' ? @profile['headline'] : page[:title]) %></h1><% if editable? && @page_key == 'home' %><div class="heading-actions"><a class="button quiet" href="/admin/profile"><%= icon('edit') %>소개 수정</a><a class="button quiet" href="/admin/navigation"><%= icon('grid') %>목차 편집</a></div><% end %></div>
   <p class="page-description"><%= h(@page_key == 'home' ? @profile['intro'] : page[:description]) %></p>
 </header>
 <% if @page_key == 'home' %>

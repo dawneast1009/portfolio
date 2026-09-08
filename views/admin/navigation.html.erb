@@ -1,0 +1,56 @@
+<a class="back-link" href="/"><%= icon('back') %>홈으로 돌아가기</a>
+<header class="admin-page-head"><p class="eyebrow">PORTFOLIO SETTINGS</p><h1>목차 관리</h1><p>상위 메뉴와 안쪽 항목을 수정합니다. 이름을 바꿔도 기존 기록과 주소는 유지됩니다.</p></header>
+<% if @error %><div class="notice error" role="alert"><%= h(@error) %></div><% end %>
+<% icon_labels = { 'file'=>'문서', 'user'=>'사람', 'pin'=>'위치', 'grid'=>'격자', 'folder'=>'폴더' } %>
+<div class="navigation-list">
+  <% @navigation.each_with_index do |page,index| %>
+  <section class="navigation-card" id="navigation-<%= h(page['id']) %>">
+    <div class="navigation-card-head">
+      <div><span class="navigation-icon"><%= icon(page['icon']) %></span><strong><%= h(page['title']) %></strong><small><%= h(Notebook.path(page['id'])) %></small></div>
+      <% unless page['id'] == 'home' %>
+      <div class="navigation-controls" aria-label="<%= h(page['title']) %> 순서와 삭제">
+        <form action="/admin/navigation/pages/<%= h(page['id']) %>/move" method="post"><%= csrf_field %><input type="hidden" name="direction" value="up"><button class="button quiet small" type="submit" <%= index <= 1 ? 'disabled' : '' %>>위로</button></form>
+        <form action="/admin/navigation/pages/<%= h(page['id']) %>/move" method="post"><%= csrf_field %><input type="hidden" name="direction" value="down"><button class="button quiet small" type="submit" <%= index == @navigation.length-1 ? 'disabled' : '' %>>아래로</button></form>
+        <form action="/admin/navigation/pages/<%= h(page['id']) %>/delete" method="post" data-confirm="이 메뉴를 삭제할까요? 연결된 기록이 있으면 삭제되지 않습니다."><%= csrf_field %><button class="button quiet small danger" type="submit"><%= icon('trash') %>삭제</button></form>
+      </div>
+      <% else %><span class="tag">홈 · 고정</span><% end %>
+    </div>
+    <form class="navigation-page-form" action="/admin/navigation/pages/<%= h(page['id']) %>" method="post">
+      <%= csrf_field %>
+      <div class="field"><label for="page-title-<%= h(page['id']) %>">메뉴 이름</label><input id="page-title-<%= h(page['id']) %>" name="title" maxlength="60" required value="<%= h(page['title']) %>"></div>
+      <div class="field"><label for="page-description-<%= h(page['id']) %>">설명</label><input id="page-description-<%= h(page['id']) %>" name="description" maxlength="300" value="<%= h(page['description']) %>"></div>
+      <div class="field"><label for="page-icon-<%= h(page['id']) %>">아이콘</label><select id="page-icon-<%= h(page['id']) %>" name="icon"><% Notebook::ICONS.each do |name| %><option value="<%= h(name) %>" <%= selected(page['icon'],name) %>><%= h(icon_labels.fetch(name)) %></option><% end %></select></div>
+      <button class="button primary" type="submit">메뉴 저장</button>
+    </form>
+    <div class="navigation-sections">
+      <h2>하위 항목 <span class="section-count"><%= page['sections'].length %></span></h2>
+      <% if page['sections'].empty? %><p class="empty-note">하위 항목이 없습니다. 아래에서 추가하세요.</p><% end %>
+      <% page['sections'].each_with_index do |section,section_index| %>
+      <div class="navigation-section-row">
+        <form class="navigation-section-form" action="/admin/navigation/pages/<%= h(page['id']) %>/sections/<%= h(section['id']) %>" method="post">
+          <%= csrf_field %><label class="visually-hidden" for="section-title-<%= h(page['id']) %>-<%= h(section['id']) %>">항목 이름</label><input id="section-title-<%= h(page['id']) %>-<%= h(section['id']) %>" name="title" maxlength="60" required value="<%= h(section['title']) %>"><button class="button" type="submit">저장</button>
+        </form>
+        <div class="navigation-controls" aria-label="<%= h(section['title']) %> 순서와 삭제">
+          <form action="/admin/navigation/pages/<%= h(page['id']) %>/sections/<%= h(section['id']) %>/move" method="post"><%= csrf_field %><input type="hidden" name="direction" value="up"><button class="button quiet small" type="submit" <%= section_index.zero? ? 'disabled' : '' %>>위로</button></form>
+          <form action="/admin/navigation/pages/<%= h(page['id']) %>/sections/<%= h(section['id']) %>/move" method="post"><%= csrf_field %><input type="hidden" name="direction" value="down"><button class="button quiet small" type="submit" <%= section_index == page['sections'].length-1 ? 'disabled' : '' %>>아래로</button></form>
+          <form action="/admin/navigation/pages/<%= h(page['id']) %>/sections/<%= h(section['id']) %>/delete" method="post" data-confirm="이 항목을 삭제할까요? 연결된 기록이 있으면 삭제되지 않습니다."><%= csrf_field %><button class="button quiet small danger" type="submit" aria-label="<%= h(section['title']) %> 삭제"><%= icon('trash') %></button></form>
+        </div>
+      </div>
+      <% end %>
+      <form class="navigation-add-form" action="/admin/navigation/pages/<%= h(page['id']) %>/sections" method="post">
+        <%= csrf_field %><label for="new-section-<%= h(page['id']) %>">새 하위 항목</label><div><input id="new-section-<%= h(page['id']) %>" name="title" maxlength="60" required placeholder="예: 자격증"><button class="button" type="submit"><%= icon('plus') %>항목 추가</button></div>
+      </form>
+    </div>
+  </section>
+  <% end %>
+</div>
+<section class="navigation-card navigation-new-page">
+  <div class="navigation-card-head"><div><span class="navigation-icon"><%= icon('plus') %></span><strong>새 상위 메뉴</strong></div></div>
+  <form class="navigation-page-form" action="/admin/navigation/pages" method="post">
+    <%= csrf_field %>
+    <div class="field"><label for="new-page-title">메뉴 이름</label><input id="new-page-title" name="title" maxlength="60" required placeholder="예: 수상 및 자격"></div>
+    <div class="field"><label for="new-page-description">설명</label><input id="new-page-description" name="description" maxlength="300" placeholder="이 페이지에 담을 내용을 소개하세요"></div>
+    <div class="field"><label for="new-page-icon">아이콘</label><select id="new-page-icon" name="icon"><% Notebook::ICONS.each do |name| %><option value="<%= h(name) %>"><%= h(icon_labels.fetch(name)) %></option><% end %></select></div>
+    <button class="button primary" type="submit"><%= icon('plus') %>메뉴 추가</button>
+  </form>
+</section>
