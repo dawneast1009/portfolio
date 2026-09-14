@@ -6,7 +6,7 @@ require_relative 'lib/portfolio/http_app'
 module Portfolio
   def self.build_server(config:, repository: nil, logger: nil)
     repository ||= Repository.new(config.storage_dir, max_upload_bytes: config.max_upload_bytes,
-      max_storage_bytes: config.max_storage_bytes)
+      max_storage_bytes: config.max_storage_bytes, persistence: SupabasePersistence.from_env(ENV))
     logger ||= WEBrick::Log.new($stderr, WEBrick::Log::INFO)
     app = HTTPApp.new(config: config, repository: repository, logger: logger)
     server = WEBrick::HTTPServer.new(Port: config.port, BindAddress: config.bind,
@@ -29,7 +29,8 @@ if $PROGRAM_NAME == __FILE__
       warn(message)
     end
     repository = Portfolio::Repository.new(config.storage_dir,
-      max_upload_bytes: config.max_upload_bytes, max_storage_bytes: config.max_storage_bytes)
+      max_upload_bytes: config.max_upload_bytes, max_storage_bytes: config.max_storage_bytes,
+      persistence: Portfolio::SupabasePersistence.from_env(ENV))
     abort('먼저 관리자 계정을 만들어 주세요: ruby bin/setup --demo') unless repository.admin
     server = Portfolio.build_server(config: config, repository: repository)
     trap('INT') { server.shutdown }

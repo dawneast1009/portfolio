@@ -6,6 +6,7 @@ require_relative 'security'
 require_relative 'store'
 require_relative 'uploads'
 require_relative 'notebook'
+require_relative 'supabase_persistence'
 
 module Portfolio
   class Repository
@@ -13,11 +14,13 @@ module Portfolio
     CATEGORIES = { 'development' => '개발', 'security' => '보안', 'research' => '기록', 'design' => '디자인', 'other' => '기타' }.freeze
     attr_reader :max_upload_bytes, :max_storage_bytes
 
-    def initialize(directory, max_upload_bytes: 10 * 1024 * 1024, max_storage_bytes: 500 * 1024 * 1024)
+    def initialize(directory, max_upload_bytes: 10 * 1024 * 1024, max_storage_bytes: 500 * 1024 * 1024, persistence: nil)
       @directory = File.expand_path(directory)
       @uploads = File.join(@directory, 'uploads')
       FileUtils.mkdir_p(@uploads, mode: 0o700)
-      @store = Store.new(@directory)
+      @persistence = persistence
+      @store = Store.new(@directory, persistence: persistence)
+      restore_persisted_files if persistence
       @max_upload_bytes, @max_storage_bytes = max_upload_bytes, max_storage_bytes
     end
 
@@ -240,6 +243,7 @@ module Portfolio
       created = false
       path = file_path(metadata)
       begin
+        @persistence&.upload_file(metadata['id'], bytes)
         @store.update do |state|
           if metadata['project_id'] && !state['projects'].key?(metadata['project_id'])
             raise ValidationError, '연결할 프로젝트를 찾을 수 없습니다'
@@ -259,6 +263,7 @@ module Portfolio
         end
       rescue StandardError
         File.unlink(path) if created && File.file?(path)
+        @persistence&.delete_file(metadata['id']) if @persistence
         raise
       end
     end
@@ -271,6 +276,7 @@ module Portfolio
         record
       end
       unlink_file(removed)
+      @persistence&.delete_file(removed['id'])
     end
 
     def toggle_file_visibility(id)
@@ -376,9 +382,27 @@ module Portfolio
         records
       end
       removed.each { |f| unlink_file(f) }
+      removed.each { |f| @persistence&.delete_file(f['id']) }
     end
 
     private
+
+    def restore_persisted_files
+      @store.read['files'].each_value do |record|
+        path = file_path(record)
+        next if File.file?(path) && File.size(path) == record['size'] && Digest::SHA256.file(path).hexdigest == record['sha256']
+        bytes = @persistence.download_file(record['id'])
+        raise PersistenceError, "Supabase에서 파일 #{record['id']}를 복원할 수 없습니다" unless bytes
+        temporary = "#{path}.restore-#{Process.pid}-#{SecureRandom.hex(4)}"
+        File.open(temporary, File::WRONLY | File::CREAT | File::EXCL, 0o600) do |handle|
+          handle.binmode
+          handle.write(bytes)
+          handle.flush
+          handle.fsync
+        end
+        File.rename(temporary, path)
+      end
+    end
 
     def navigation_state(state)
       state['notebook_navigation'] ||= Notebook.default_navigation

@@ -5,7 +5,7 @@ root = File.expand_path('..', __dir__)
 begin
   Portfolio::Config.load_env(File.join(root, '.env'))
   Portfolio::Deployment.prepare!(root: root)
-rescue ArgumentError, Portfolio::ValidationError => e
+rescue ArgumentError, Portfolio::ValidationError, Portfolio::PersistenceError => e
   warn "배포 초기화 실패: #{e.message}"
   exit 1
 end

@@ -8,7 +8,7 @@ module Portfolio
   class RackApp
     def initialize(config:, repository: nil, logger: nil)
       repository ||= Repository.new(config.storage_dir, max_upload_bytes: config.max_upload_bytes,
-        max_storage_bytes: config.max_storage_bytes)
+        max_storage_bytes: config.max_storage_bytes, persistence: SupabasePersistence.from_env(ENV))
       logger ||= WEBrick::Log.new($stderr, WEBrick::Log::INFO)
       @app = HTTPApp.new(config: config, repository: repository, logger: logger)
     end

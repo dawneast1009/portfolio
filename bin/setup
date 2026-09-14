@@ -22,7 +22,7 @@ begin
   Portfolio::Config.load_env(File.join(root, '.env'))
   config = Portfolio::Config.new(root: root)
   repo = Portfolio::Repository.new(config.storage_dir, max_upload_bytes: config.max_upload_bytes,
-    max_storage_bytes: config.max_storage_bytes)
+    max_storage_bytes: config.max_storage_bytes, persistence: Portfolio::SupabasePersistence.from_env(ENV))
   existing = repo.admin
   if existing && !options[:reset]
     repo.seed_demo if options[:demo]

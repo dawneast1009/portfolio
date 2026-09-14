@@ -14,12 +14,15 @@ module Portfolio
       'location' => '', 'resume_id' => '', 'status' => ''
     }.freeze
 
-    def initialize(directory)
+    def initialize(directory, persistence: nil)
+      @persistence = persistence
       FileUtils.mkdir_p(directory, mode: 0o700)
       @path = File.join(directory, 'portfolio.pstore')
       @database = PStore.new(@path, true)
       @database.ultra_safe = true
+      remote_state = @persistence&.restore_state
       @database.transaction do
+        @database[:state] = remote_state if remote_state
         @database[:state] ||= { 'schema_version' => 1, 'profile' => DEFAULT_PROFILE.dup,
           'admin' => nil, 'projects' => {}, 'files' => {}, 'messages' => {} }
         raise 'Unsupported storage schema' unless @database[:state]['schema_version'] == 1
@@ -35,12 +38,16 @@ module Portfolio
     end
 
     def update
+      result = nil
+      saved_state = nil
       @database.transaction do
         state = @database[:state]
         result = yield(state)
         @database[:state] = state
-        result
+        saved_state = Marshal.load(Marshal.dump(state))
       end
+      @persistence&.save_state(saved_state)
+      result
     end
   end
 end
