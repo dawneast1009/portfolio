@@ -102,10 +102,12 @@ module Portfolio
         headers: { 'Accept' => 'application/json', 'Cache-Control' => 'no-cache' })
       raise PersistenceError, 'Supabase Database 테이블을 찾을 수 없습니다. supabase/schema.sql을 먼저 실행해 주세요' if response.code.to_i == 404
       rows = parse_json(response, service: 'Supabase Database')
-      return nil if rows.empty?
+      rows = [rows] if rows.is_a?(Hash) && rows.key?('revision') && rows.key?('state')
+      return nil if rows.is_a?(Array) && rows.empty?
       unless rows.is_a?(Array)
         detail = rows.is_a?(Hash) ? rows['message'] || rows['error'] : nil
-        suffix = detail.to_s.empty? ? '' : ": #{detail.to_s.byteslice(0, 200)}"
+        keys = rows.is_a?(Hash) ? rows.keys.map(&:to_s).sort.join(',') : rows.class.name
+        suffix = detail.to_s.empty? ? " (keys: #{keys})" : ": #{detail.to_s.byteslice(0, 200)}"
         raise PersistenceError, "Supabase Database 응답 형식이 올바르지 않습니다#{suffix}"
       end
       row = rows.first
@@ -133,6 +135,7 @@ module Portfolio
           'updated_at' => Time.now.utc.iso8601 }),
         headers: json_headers.merge('Prefer' => 'return=representation'))
       rows = parse_json(response, service: 'Supabase Database')
+      rows = [rows] if rows.is_a?(Hash) && rows.key?('revision')
       raise PersistenceConflict, 'Supabase 상태가 다른 곳에서 변경됐습니다. 페이지를 새로고침해 주세요' if rows.empty?
       Integer(rows.first.fetch('revision'))
     rescue KeyError, TypeError, ArgumentError
@@ -146,6 +149,7 @@ module Portfolio
     end
 
     def first_row(rows)
+      rows = [rows] if rows.is_a?(Hash) && rows.key?('revision')
       raise PersistenceError, 'Supabase Database가 저장 결과를 반환하지 않았습니다' unless rows.is_a?(Array) && rows.first.is_a?(Hash)
       rows.first
     end

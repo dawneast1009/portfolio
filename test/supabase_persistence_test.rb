@@ -207,6 +207,12 @@ class SupabasePersistenceTest < Minitest::Test
     assert_equal 2, payload['revision']
   end
 
+  def test_database_restore_accepts_a_single_row_response
+    client = Portfolio::SupabaseDatabaseClient.new(url: 'https://example.supabase.co', service_role_key: 'secret',
+      transport: ->(**) { Response.new('200', '{"revision":1,"state":{}}') })
+    assert_equal({ 'state' => {}, 'revision' => 1 }, client.restore_state)
+  end
+
   def test_database_update_rejects_empty_conditional_result
     client = Portfolio::SupabaseDatabaseClient.new(url: 'https://example.supabase.co', service_role_key: 'secret',
       transport: ->(**) { Response.new('200', '[]') })

@@ -47,7 +47,7 @@ Gemfile의 공개 배포용 조건은 그대로 유지했습니다: WEBrick >= 1
 
 ## 2026-09-09 목차 편집 검증
 
-`ruby bin/test`: 142 runs, 1022 assertions, 0 failures, 0 errors, 0 skips
+`ruby bin/test`: 143 runs, 1023 assertions, 0 failures, 0 errors, 0 skips
 
 관리자 목차 편집 기능은 저장소 계층과 실제 HTTP 요청 양쪽에서 검증했습니다. 기존 다섯 메뉴와 밑줄이 포함된 기존 하위 항목 ID를 유지하는 이전 데이터 호환, 상위 메뉴·하위 항목 추가 및 이름 변경, 순서 이동, 빈 항목 삭제, 기록이 연결된 항목의 삭제 차단, 홈 삭제 차단, 입력 길이·제어문자·아이콘·개수 제한을 확인했습니다.
 
@@ -57,6 +57,6 @@ Gemfile의 공개 배포용 조건은 그대로 유지했습니다: WEBrick >= 1
 
 ## 2026-09-14 Supabase 저장 연동 검증
 
-`ruby bin/test`: 142 runs, 1022 assertions, 0 failures, 0 errors, 0 skips
+`ruby bin/test`: 143 runs, 1023 assertions, 0 failures, 0 errors, 0 skips
 
 Supabase Postgres revision 저장소와 Storage 어댑터를 가짜 원격 클라이언트로 검증했습니다. 새 프로세스가 상태 행과 업로드 파일을 복원하고, 조건부 revision으로 오래된 Render 프로세스가 최신 수정 내용을 덮어쓰지 못하며, 파일 무결성(SHA-256·크기)을 확인하는 것을 검증했습니다. 원격 설정이 일부만 있거나 연결에 실패할 때 임시 로컬 저장으로 조용히 전환하지 않습니다. 공개 페이지는 로그인 없이 열리고 관리자 변경 경로는 기존 로그인과 CSRF 검사를 계속 요구합니다.
