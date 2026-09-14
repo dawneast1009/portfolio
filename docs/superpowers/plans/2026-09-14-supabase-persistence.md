@@ -2,11 +2,11 @@
 
 > **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:executing-plans to implement this plan task-by-task.
 
-**Goal:** Persist portfolio state and uploaded files through a private Supabase Storage bucket while keeping public viewing open and edits login-protected.
+**Goal:** Persist portfolio state in Supabase Postgres and uploaded files through a private Supabase Storage bucket while keeping public viewing open and edits login-protected.
 
-**Architecture:** Add a small REST object client and persistence adapter behind the existing `Store` interface. The adapter synchronizes `state.json` and `files/<id>.blob`; local PStore remains the fallback when Supabase variables are absent, while configured production startup fails closed if the remote is unavailable.
+**Architecture:** Add Supabase Postgres as a revision-checked state authority and a private Storage object client for file bytes behind the existing `Store` interface. Conditional revision updates prevent stale Render containers from overwriting edits; local PStore remains the fallback when Supabase variables are absent, while configured production startup fails closed if the remote is unavailable.
 
-**Tech Stack:** Ruby standard library (`Net::HTTP`, `JSON`), PStore, Supabase Storage REST API, existing WEBrick/Puma/Rack adapters, Minitest.
+**Tech Stack:** Ruby standard library (`Net::HTTP`, `JSON`), PStore, Supabase PostgREST and Storage REST APIs, existing WEBrick/Puma/Rack adapters, Minitest.
 
 **Spec:** `docs/superpowers/specs/2026-09-14-supabase-persistence-design.md`
 
@@ -29,9 +29,9 @@
 
 **Interfaces:**
 - `SupabasePersistence.from_env(env)` returns `nil` when `SUPABASE_URL` and `SUPABASE_SERVICE_ROLE_KEY` are both absent, otherwise returns a configured adapter.
-- `restore_state` returns a decoded state hash or `nil` for a missing `state.json`.
-- `save_state(state)`, `upload_file(id, bytes)`, `download_file(id)`, and `delete_file(id)` synchronize private objects.
-- `Store.new(directory, persistence: nil)` restores remote state before creating the local PStore and invokes `persistence.save_state(state)` after successful updates.
+- `restore_state` returns a decoded state hash plus revision or `nil` for a missing `portfolio_state` row.
+- `save_state(state, expected_revision:)` performs a conditional Postgres update/insert and returns the new revision; `upload_file(id, bytes)`, `download_file(id)`, and `delete_file(id)` synchronize private objects.
+- `Store.new(directory, persistence: nil)` restores remote state before creating the local PStore and invokes `persistence.save_state(state, expected_revision:)` after successful updates.
 
 - [ ] **Step 1: Write failing persistence tests**
 
@@ -44,7 +44,7 @@ Expected: failures because the adapter and Store persistence hook do not exist.
 
 - [ ] **Step 3: Implement the adapter and Store hook**
 
-Use `Net::HTTP` with HTTPS-only Supabase URLs, `Authorization: Bearer <service-role-key>`, `apikey`, JSON `state.json`, and binary file objects. Treat HTTP 404 for downloads as a missing object, reject non-2xx responses with a configuration error, and never include the key in exception text. Make `Store` restore the remote state before initializing defaults and synchronize after each committed transaction.
+Use `Net::HTTP` with HTTPS-only Supabase URLs, `Authorization: Bearer <service-role-key>`, `apikey`, revision-filtered PostgREST requests for `portfolio_state`, and binary Storage objects. Treat HTTP 404 for downloads as a missing object, reject non-2xx responses with a configuration error, reject zero-row revision updates as a persistence conflict, and never include the key in exception text. Make `Store` restore the remote state before initializing defaults and synchronize inside each local transaction before committing it.
 
 - [ ] **Step 4: Run the focused tests**
 
@@ -120,7 +120,7 @@ Assert the free Blueprint documents the optional Supabase variables without putt
 
 - [ ] **Step 2: Implement setup and migration guidance**
 
-Document the Supabase Dashboard steps, Render Environment settings, private bucket requirement, and `ruby bin/supabase-migrate` command. Explain that public viewing is open while editing still requires login, and that Supabase Free may pause after inactivity while retaining data.
+Document the Supabase Dashboard steps, setup SQL, Render Environment settings, private bucket requirement, and `ruby bin/supabase-migrate` command. Explain that public viewing is open while editing still requires login, and that Supabase Free may pause after inactivity while retaining data.
 
 - [ ] **Step 3: Run documentation/configuration tests**
 

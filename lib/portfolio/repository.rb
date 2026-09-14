@@ -19,7 +19,8 @@ module Portfolio
       @uploads = File.join(@directory, 'uploads')
       FileUtils.mkdir_p(@uploads, mode: 0o700)
       @persistence = persistence
-      @store = Store.new(@directory, persistence: persistence)
+      @store = Store.new(@directory, persistence: persistence,
+        on_remote_refresh: persistence ? -> { restore_persisted_files } : nil)
       restore_persisted_files if persistence
       @max_upload_bytes, @max_storage_bytes = max_upload_bytes, max_storage_bytes
     end
@@ -232,6 +233,7 @@ module Portfolio
         attached
       end
       removed.each { |f| unlink_file(f) }
+      removed.each { |f| delete_persisted_file(f['id']) }
     end
 
     def add_file(filename:, bytes:, project_id: nil, label: '', public: false, demo: false)
@@ -261,9 +263,12 @@ module Portfolio
           state['files'][metadata['id']] = metadata
           metadata.dup
         end
-      rescue StandardError
+      rescue StandardError => error
         File.unlink(path) if created && File.file?(path)
-        @persistence&.delete_file(metadata['id']) if @persistence
+        # A failed network response may hide a successful upload. Keep the blob
+        # in that case so a remotely committed metadata row never points at a
+        # missing file; a later cleanup can remove orphaned blobs.
+        delete_persisted_file(metadata['id']) if @persistence && !error.is_a?(PersistenceError)
         raise
       end
     end
@@ -276,7 +281,7 @@ module Portfolio
         record
       end
       unlink_file(removed)
-      @persistence&.delete_file(removed['id'])
+      delete_persisted_file(removed['id'])
     end
 
     def toggle_file_visibility(id)
@@ -382,7 +387,7 @@ module Portfolio
         records
       end
       removed.each { |f| unlink_file(f) }
-      removed.each { |f| @persistence&.delete_file(f['id']) }
+      removed.each { |f| delete_persisted_file(f['id']) }
     end
 
     private
@@ -393,6 +398,9 @@ module Portfolio
         next if File.file?(path) && File.size(path) == record['size'] && Digest::SHA256.file(path).hexdigest == record['sha256']
         bytes = @persistence.download_file(record['id'])
         raise PersistenceError, "Supabase에서 파일 #{record['id']}를 복원할 수 없습니다" unless bytes
+        unless bytes.bytesize == record['size'] && Digest::SHA256.hexdigest(bytes) == record['sha256']
+          raise PersistenceError, "Supabase 파일 #{record['id']}의 무결성 검증에 실패했습니다"
+        end
         temporary = "#{path}.restore-#{Process.pid}-#{SecureRandom.hex(4)}"
         File.open(temporary, File::WRONLY | File::CREAT | File::EXCL, 0o600) do |handle|
           handle.binmode
@@ -402,6 +410,12 @@ module Portfolio
         end
         File.rename(temporary, path)
       end
+    end
+
+    def delete_persisted_file(id)
+      @persistence&.delete_file(id)
+    rescue PersistenceError => e
+      warn "Supabase 파일 정리를 나중에 다시 시도해야 합니다 (#{id}: #{e.class})"
     end
 
     def navigation_state(state)

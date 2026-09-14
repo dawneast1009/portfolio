@@ -37,7 +37,7 @@ if $PROGRAM_NAME == __FILE__
     trap('TERM') { server.shutdown }
     puts "\nPortfolio: #{config.app_url}\nAdmin:     #{config.app_url}/admin\n종료: Ctrl+C\n\n"
     server.start
-  rescue ArgumentError => e
+  rescue ArgumentError, Portfolio::PersistenceError => e
     abort("설정 오류: #{e.message}")
   end
 end
