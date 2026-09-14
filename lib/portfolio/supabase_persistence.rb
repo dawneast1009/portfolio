@@ -44,7 +44,14 @@ module Portfolio
 
     def expect_success(response, service: 'Supabase')
       return response if response.code.to_i.between?(200, 299)
-      raise PersistenceError, "#{service} 요청이 실패했습니다 (HTTP #{response.code})"
+      detail = begin
+        parsed = JSON.parse(response.body.to_s, create_additions: false)
+        parsed.is_a?(Hash) ? parsed['message'] || parsed['error'] : nil
+      rescue JSON::ParserError
+        nil
+      end
+      suffix = detail.to_s.empty? ? '' : ": #{detail.to_s.byteslice(0, 200)}"
+      raise PersistenceError, "#{service} 요청이 실패했습니다 (HTTP #{response.code})#{suffix}"
     end
 
     def parse_json(response, service: 'Supabase')
@@ -96,7 +103,11 @@ module Portfolio
       raise PersistenceError, 'Supabase Database 테이블을 찾을 수 없습니다. supabase/schema.sql을 먼저 실행해 주세요' if response.code.to_i == 404
       rows = parse_json(response, service: 'Supabase Database')
       return nil if rows.empty?
-      raise PersistenceError, 'Supabase Database 응답 형식이 올바르지 않습니다' unless rows.is_a?(Array)
+      unless rows.is_a?(Array)
+        detail = rows.is_a?(Hash) ? rows['message'] || rows['error'] : nil
+        suffix = detail.to_s.empty? ? '' : ": #{detail.to_s.byteslice(0, 200)}"
+        raise PersistenceError, "Supabase Database 응답 형식이 올바르지 않습니다#{suffix}"
+      end
       row = rows.first
       revision = Integer(row.fetch('revision'))
       raise PersistenceError, 'Supabase Database의 revision이 올바르지 않습니다' if revision < 1
@@ -145,7 +156,7 @@ module Portfolio
 
     def self.from_env(env)
       url = env['SUPABASE_URL'].to_s.strip
-      key = env['SUPABASE_SERVICE_ROLE_KEY'].to_s.strip
+      key = (env['SUPABASE_SERVICE_ROLE_KEY'].to_s.strip.empty? ? env['SUPABASE_SECRET_KEY'] : env['SUPABASE_SERVICE_ROLE_KEY']).to_s.strip
       return nil if url.empty? && key.empty?
       raise PersistenceError, 'SUPABASE_URL과 SUPABASE_SERVICE_ROLE_KEY를 함께 설정해 주세요' if url.empty? || key.empty?
       new(url: url, service_role_key: key, bucket: env.fetch('SUPABASE_BUCKET', 'portfolio-data'))

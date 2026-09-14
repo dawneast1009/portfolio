@@ -181,6 +181,13 @@ class SupabasePersistenceTest < Minitest::Test
     assert_equal 'portfolio-data', persistence.bucket
   end
 
+  def test_supabase_environment_accepts_current_secret_key_name
+    persistence = Portfolio::SupabasePersistence.from_env(
+      'SUPABASE_URL' => 'https://example.supabase.co', 'SUPABASE_SECRET_KEY' => 'sb_secret_test',
+      'SUPABASE_BUCKET' => 'portfolio')
+    assert_equal 'portfolio', persistence.bucket
+  end
+
   def test_database_update_uses_conditional_revision_and_service_headers
     calls = []
     client = Portfolio::SupabaseDatabaseClient.new(url: 'https://example.supabase.co', service_role_key: 'secret',
