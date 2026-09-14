@@ -17,7 +17,8 @@ module Portfolio
 
       settings = Config.new(root: root, env: env)
       repository = Repository.new(settings.storage_dir,
-        max_upload_bytes: settings.max_upload_bytes, max_storage_bytes: settings.max_storage_bytes)
+        max_upload_bytes: settings.max_upload_bytes, max_storage_bytes: settings.max_storage_bytes,
+        persistence: SupabasePersistence.from_env(env))
       unless repository.admin
         if password.to_s.empty?
           raise ArgumentError, '첫 실행에는 Render 환경변수 ADMIN_PASSWORD가 필요합니다 (15자 이상)'

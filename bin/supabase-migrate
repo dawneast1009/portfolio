@@ -1,0 +1,24 @@
+#!/usr/bin/env ruby
+# frozen_string_literal: true
+require_relative '../lib/portfolio/config'
+require_relative '../lib/portfolio/repository'
+require_relative '../lib/portfolio/store'
+
+begin
+  root = File.expand_path('..', __dir__)
+  Portfolio::Config.load_env(File.join(root, '.env'))
+  config = Portfolio::Config.new(root: root)
+  persistence = Portfolio::SupabasePersistence.from_env(ENV)
+  raise ArgumentError, 'SUPABASE_URL과 SUPABASE_SERVICE_ROLE_KEY를 먼저 설정해 주세요' unless persistence
+  state = Portfolio::Store.new(config.storage_dir).read
+  raise ArgumentError, '원격 상태가 이미 있습니다. 덮어쓰려면 먼저 Supabase를 확인하세요' if persistence.restore_state
+  repository = Portfolio::Repository.new(config.storage_dir)
+  state['files'].each_key do |id|
+    file = state['files'][id]
+    persistence.upload_file(id, File.binread(repository.file_path(file)))
+  end
+  persistence.save_state(state, expected_revision: nil)
+  puts "Supabase로 상태와 #{state['files'].size}개 파일을 올렸습니다."
+rescue ArgumentError, Portfolio::PersistenceError, Errno::ENOENT => e
+  abort("Supabase 마이그레이션 실패: #{e.message}")
+end

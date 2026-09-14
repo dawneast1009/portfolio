@@ -14,12 +14,18 @@ module Portfolio
       'location' => '', 'resume_id' => '', 'status' => ''
     }.freeze
 
-    def initialize(directory)
+    def initialize(directory, persistence: nil, on_remote_refresh: nil)
+      @persistence = persistence
+      @on_remote_refresh = on_remote_refresh
       FileUtils.mkdir_p(directory, mode: 0o700)
       @path = File.join(directory, 'portfolio.pstore')
       @database = PStore.new(@path, true)
       @database.ultra_safe = true
+      remote = @persistence&.restore_state
+      remote_state = remote && remote.fetch('state')
+      @revision = remote && Integer(remote.fetch('revision'))
       @database.transaction do
+        @database[:state] = remote_state if remote_state
         @database[:state] ||= { 'schema_version' => 1, 'profile' => DEFAULT_PROFILE.dup,
           'admin' => nil, 'projects' => {}, 'files' => {}, 'messages' => {} }
         raise 'Unsupported storage schema' unless @database[:state]['schema_version'] == 1
@@ -35,12 +41,33 @@ module Portfolio
     end
 
     def update
+      result = nil
+      saved_state = nil
+      next_revision = @revision
       @database.transaction do
         state = @database[:state]
         result = yield(state)
+        saved_state = Marshal.load(Marshal.dump(state))
+        next_revision = @persistence ? @persistence.save_state(saved_state, expected_revision: @revision) : @revision
         @database[:state] = state
-        result
       end
+      @revision = next_revision if @persistence
+      result
+    rescue PersistenceConflict
+      refresh_remote_state!
+      raise
+    end
+
+    private
+
+    def refresh_remote_state!
+      remote = @persistence&.restore_state
+      return unless remote
+      state = remote.fetch('state')
+      revision = Integer(remote.fetch('revision'))
+      @database.transaction { @database[:state] = state }
+      @revision = revision
+      @on_remote_refresh&.call
     end
   end
 end

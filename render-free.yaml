@@ -18,6 +18,12 @@ services:
         value: 0.0.0.0
       - key: STORAGE_DIR
         value: /tmp/portfolio-preview
+      - key: SUPABASE_URL
+        sync: false
+      - key: SUPABASE_SERVICE_ROLE_KEY
+        sync: false
+      - key: SUPABASE_BUCKET
+        value: portfolio-data
       - key: BUNDLE_DEPLOYMENT
         value: "false"
       - key: BUNDLE_FROZEN

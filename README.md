@@ -53,7 +53,7 @@ HTML 파일을 더블클릭하는 것이 아니라 Ruby 서버를 실행해야 �
 
 이름을 바꿔도 내부 주소와 기존 기록 연결은 유지됩니다. 기록이 들어 있는 메뉴나 항목은 실수로 자료가 사라지지 않도록 삭제가 차단됩니다. 하위 항목은 기록을 다른 항목으로 옮기거나 삭제한 뒤 지울 수 있고, 상위 메뉴는 안의 기록을 모두 삭제한 뒤 지울 수 있습니다. 홈 메뉴는 수정할 수 있지만 삭제하거나 다른 위치로 이동할 수 없습니다.
 
-목차 설정은 글과 파일처럼 `storage/portfolio.pstore`에 저장됩니다. 무료 Render가 재시작되거나 재배포되면 수정한 목차도 초기화될 수 있으므로 중요한 구성과 자료는 제출용 ZIP 및 `storage/` 백업으로 보관하세요.
+목차 설정은 글과 파일처럼 `storage/portfolio.pstore`에 저장됩니다. 무료 Render에서 오래 보존하려면 [Supabase 무료 저장소 연결 안내](SUPABASE_SETUP.md)에 따라 Postgres와 비공개 Storage를 연결하세요. 연결하지 않은 무료 Render는 재시작·재배포 때 수정한 목차와 자료가 초기화될 수 있습니다.
 
 기록 또는 첨부파일을 삭제하면 복구되지 않습니다. 기록을 삭제할 때에는 연결된 파일도 함께 삭제합니다. 실제 이름·학교·학번·연락처 등 개인정보는 공개 범위를 확인하고 필요한 내용만 쓰세요.
 
@@ -108,11 +108,11 @@ git push
 
 커밋 전에 `.env`, `.pstore`, `.blob`, 원본 백업, 개인정보가 들어가지 않았는지 확인하세요. 새 파일 `lib/portfolio/notebook.rb`, `notebook_routes.rb`, `static_export.rb`, `views/notebook/`, `public/assets/notebook.css`도 모두 포함해야 합니다. 일부 화면 파일만 덮어쓰면 동작하지 않습니다.
 
-**이번 버전의 `render.yaml`과 `render-free.yaml`은 모두 Free 설정입니다. 이전 ZIP에서 render.yaml이 유료였던 것과 다릅니다.** 기본 `SEED_DEMO`는 false라 처음에는 빈 항목으로 시작합니다. 유료 디스크나 서비스는 자동 생성하지 않습니다.
+**이번 버전의 `render.yaml`과 `render-free.yaml`은 모두 Free 설정입니다. 이전 ZIP에서 render.yaml이 유료였던 것과 다릅니다.** 기본 `SEED_DEMO`는 false라 처음에는 빈 항목으로 시작합니다. 유료 디스크나 서비스는 자동 생성하지 않습니다. 무료 Render에서 재시작 후에도 자료를 유지하려면 [Supabase 무료 저장소 연결 안내](SUPABASE_SETUP.md)를 먼저 적용하세요.
 
 Render 자동 배포가 연결돼 있으면 커밋 후 서비스의 배포 결과를 확인하세요. 새로 배포할 때에는 Blueprint에서 `render-free.yaml`을 선택하고 기존 안내대로 ADMIN_PASSWORD를 설정합니다. 배포 전 실제 화면에서 Free인지 다시 확인하세요. `APP_URL`은 Render가 할당한 HTTPS 주소를 기본으로 사용합니다.
 
-무료 Render는 재시작·재배포·유휴 종료 때 로컬의 글과 파일을 잃습니다. 관리자에서 바꾼 내용은 GitHub에 자동 커밋되지 않습니다. 따라서 무료 Render 주소만을 장기 보관용 제출본으로 사용하는 방식은 권장하지 않습니다. 이 문제를 외부 데이터베이스로 해결한 상태도 아닙니다.
+Supabase를 연결하지 않은 무료 Render는 재시작·재배포·유휴 종료 때 로컬의 글과 파일을 잃습니다. Supabase를 연결해도 관리자에서 바꾼 내용은 GitHub에 자동 커밋되지 않습니다. Supabase 연결과 백업 절차는 [SUPABASE_SETUP.md](SUPABASE_SETUP.md)를 따르세요.
 
 ## 6. 기존 데이터 호환과 백업
 
