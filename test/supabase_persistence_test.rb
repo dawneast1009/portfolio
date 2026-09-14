@@ -8,11 +8,12 @@ class SupabasePersistenceTest < Minitest::Test
   class FakePersistence
     attr_reader :states, :files
 
-    def initialize(state: nil, unavailable: false)
+    def initialize(state: nil, unavailable: false, fail_on_save: false)
       @state = state
       @states = []
       @files = {}
       @unavailable = unavailable
+      @fail_on_save = fail_on_save
     end
 
     def restore_state
@@ -22,6 +23,7 @@ class SupabasePersistenceTest < Minitest::Test
 
     def save_state(state)
       raise Portfolio::PersistenceError, 'remote unavailable' if @unavailable
+      raise Portfolio::PersistenceError, 'remote write failed' if @fail_on_save
       @state = deep_copy(state)
       @states << deep_copy(state)
     end
@@ -93,6 +95,13 @@ class SupabasePersistenceTest < Minitest::Test
     assert remote.files.key?(file['id'])
     repo.delete_file(file['id'])
     refute remote.files.key?(file['id'])
+  end
+
+  def test_failed_remote_state_write_does_not_commit_local_change
+    remote = FakePersistence.new(fail_on_save: true)
+    repo = Portfolio::Repository.new(@first_dir, persistence: remote)
+    assert_raises(Portfolio::PersistenceError) { repo.setup_admin('owner', 'a-persistence-test-password!') }
+    assert_nil repo.admin
   end
 
   def test_supabase_environment_requires_both_url_and_service_key

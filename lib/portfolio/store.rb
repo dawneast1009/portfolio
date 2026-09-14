@@ -43,10 +43,10 @@ module Portfolio
       @database.transaction do
         state = @database[:state]
         result = yield(state)
-        @database[:state] = state
         saved_state = Marshal.load(Marshal.dump(state))
+        @persistence&.save_state(saved_state)
+        @database[:state] = state
       end
-      @persistence&.save_state(saved_state)
       result
     end
   end
