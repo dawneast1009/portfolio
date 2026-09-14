@@ -26,7 +26,10 @@ module Portfolio
 
     def request(method, path, body: nil, headers: {})
       uri = @base + path
-      merged = { 'Authorization' => "Bearer #{@key}", 'apikey' => @key }.merge(headers)
+      merged = { 'apikey' => @key }.merge(headers)
+      # Supabase's current sb_secret_* keys are API keys, not JWTs. Sending
+      # them as a Bearer token makes the gateway reject an otherwise valid key.
+      merged['Authorization'] = "Bearer #{@key}" unless @key.start_with?('sb_')
       return @transport.call(method: method, uri: uri, headers: merged, body: body) if @transport
 
       request = method.new(uri)
@@ -93,6 +96,7 @@ module Portfolio
       raise PersistenceError, 'Supabase Database 테이블을 찾을 수 없습니다. supabase/schema.sql을 먼저 실행해 주세요' if response.code.to_i == 404
       rows = parse_json(response, service: 'Supabase Database')
       return nil if rows.empty?
+      raise PersistenceError, 'Supabase Database 응답 형식이 올바르지 않습니다' unless rows.is_a?(Array)
       row = rows.first
       revision = Integer(row.fetch('revision'))
       raise PersistenceError, 'Supabase Database의 revision이 올바르지 않습니다' if revision < 1

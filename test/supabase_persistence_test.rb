@@ -212,6 +212,18 @@ class SupabasePersistenceTest < Minitest::Test
     assert_raises(Portfolio::PersistenceError) { client.restore_state }
   end
 
+  def test_current_secret_key_is_sent_as_an_api_key_without_jwt_bearer_header
+    calls = []
+    client = Portfolio::SupabaseDatabaseClient.new(url: 'https://example.supabase.co', service_role_key: 'sb_secret_test',
+      transport: lambda { |**request|
+        calls << request
+        Response.new('200', '[]')
+      })
+    assert_nil client.restore_state
+    assert_equal 'sb_secret_test', calls.fetch(0)[:headers]['apikey']
+    refute calls.fetch(0)[:headers].key?('Authorization')
+  end
+
   def test_storage_client_uses_no_store_upload_and_cache_busted_download
     calls = []
     client = Portfolio::SupabaseObjectClient.new(url: 'https://example.supabase.co', service_role_key: 'secret', bucket: 'portfolio-data',
