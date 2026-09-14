@@ -116,4 +116,16 @@ class DeploymentTest < Minitest::Test
     env = service.fetch('envVars').to_h { |v| [v.fetch('key'), v] }
     assert_equal '/tmp/portfolio-preview', env.fetch('STORAGE_DIR').fetch('value')
   end
+
+  def test_free_blueprint_exposes_optional_supabase_persistence_secrets
+    service = YAML.safe_load_file(File.join(ROOT, 'render-free.yaml')).fetch('services').first
+    env = service.fetch('envVars').to_h { |v| [v.fetch('key'), v] }
+    assert_equal false, env.fetch('SUPABASE_URL').fetch('sync')
+    assert_equal false, env.fetch('SUPABASE_SERVICE_ROLE_KEY').fetch('sync')
+    assert_equal 'portfolio-data', env.fetch('SUPABASE_BUCKET').fetch('value')
+    setup = File.read(File.join(ROOT, 'SUPABASE_SETUP.md'), encoding: 'UTF-8')
+    assert_includes setup, 'SUPABASE_SERVICE_ROLE_KEY'
+    assert_includes setup, 'ruby bin/supabase-migrate'
+    assert_includes setup, 'Public bucket을 끕니다'
+  end
 end
