@@ -29,6 +29,13 @@ class HardcodedContentTest < Minitest::Test
     assert_includes @repo.profile['bio'], 'CTF'
     assert @repo.projects.any? { |record| record['title'] == '수상 및 대회 실적' && record['notebook_page'] == 'activities' }
     assert @repo.projects.any? { |record| record['title'] == '동아리 활동' && record['notebook_section'] == 'club' }
+    clubs = @repo.projects.find { |record| record['title'] == '동아리 활동' }
+    assert_includes clubs['body'], '선린인터넷고등학교 121기'
+    assert_includes clubs['body'], 'Null 동아리 2기'
+    assert_includes clubs['body'], 'Phase 동아리 1기'
+    refute_includes clubs['body'], 'th'
+    awards = @repo.projects.find { |record| record['title'] == '수상 및 대회 실적' }
+    assert_operator awards['body'].index('2026.09'), :<, awards['body'].index('2026.08')
     assert @repo.projects.any? { |record| record['title'] == '진로 학습지' && record['notebook_page'] == 'career' }
     assert @repo.projects.any? { |record| record['title'] == '포트폴리오 사이트' && record['notebook_page'] == 'career' }
     assert @repo.projects.any? do |record|
@@ -45,6 +52,8 @@ class HardcodedContentTest < Minitest::Test
     assert_equal '', pqc['body']
     assert_equal 'personal', school_project['notebook_section']
     assert_equal '', school_project['body']
+    reversing = @repo.projects.find { |record| record['title'] == '선린 소수전공 3기 리버싱 심화' }
+    assert_equal 'personal', reversing['notebook_section']
     worksheet = @repo.files.find { |file| file['filename'] == Portfolio::HardcodedContent::PDF_FILENAME }
     refute_nil worksheet
     assert_equal true, worksheet['public']

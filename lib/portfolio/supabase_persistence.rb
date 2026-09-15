@@ -26,7 +26,8 @@ module Portfolio
 
     def request(method, path, body: nil, headers: {})
       uri = @base + path
-      merged = { 'apikey' => @key }.merge(headers)
+      merged = { 'apikey' => @key, 'Accept-Encoding' => 'identity',
+        'User-Agent' => 'dawneast-portfolio/1.0' }.merge(headers)
       # Supabase's current sb_secret_* keys are API keys, not JWTs. Sending
       # them as a Bearer token makes the gateway reject an otherwise valid key.
       merged['Authorization'] = "Bearer #{@key}" unless @key.start_with?('sb_')
@@ -58,7 +59,10 @@ module Portfolio
       expect_success(response, service: service)
       JSON.parse(response.body.to_s, create_additions: false)
     rescue JSON::ParserError
-      raise PersistenceError, "#{service} 응답 형식이 올바르지 않습니다"
+      content_type = response['content-type'].to_s.split(';').first
+      content_type = '알 수 없음' if content_type.empty?
+      raise PersistenceError, "#{service} 응답 형식이 올바르지 않습니다 " \
+        "(HTTP #{response.code}, Content-Type #{content_type}, #{response.body.to_s.bytesize} bytes)"
     end
   end
 

@@ -2,9 +2,9 @@
 
 module Portfolio
   module HardcodedContent
-    VERSION = 5
+    VERSION = 6
     PDF_FILENAME = 'CamScanner 2026. 09. 08. 12(1).pdf'
-    OBSOLETE_PROJECT_TITLES = ['PQC 암호 연구 (진행중)'].freeze
+    REFRESH_RECORD_TITLES = ['PQC 암호 연구 (진행중)', '동아리 활동', '수상 및 대회 실적'].freeze
 
     PROFILE = {
       'display_name' => 'dawneast',
@@ -40,8 +40,8 @@ module Portfolio
         'title' => '수상 및 대회 실적', 'page' => 'activities', 'section' => 'awards',
         'category' => 'security', 'year' => '2026', 'tags' => 'CTF, 보안, 수상',
         'body' => <<~TEXT.strip
-          2026.08 · CCE Finalist
           2026.09 · JBUCTF 2026 우수상
+          2026.08 · CCE Finalist
           2026.08 · gaslightCTF 2026 1위
           2026.08 · CyberGuardians CMX 본선 진출
           2026.08 · Universal CTF 2026 2위
@@ -52,9 +52,9 @@ module Portfolio
         'title' => '동아리 활동', 'page' => 'activities', 'section' => 'club',
         'category' => 'security', 'year' => '2026', 'tags' => '동아리, 보안, Sunrin',
         'body' => <<~TEXT.strip
-          Sunrin Internet High School 121th
-          Sunrin Null Club 2th
-          Sunrin Phase Club 1th
+          선린인터넷고등학교 121기
+          Null 동아리 2기
+          Phase 동아리 1기
 
           동아리 활동을 통해 보안 문제를 함께 분석하고, 풀이와 학습 내용을 나누며 꾸준히 실력을 쌓고 있습니다.
         TEXT
@@ -86,6 +86,12 @@ module Portfolio
         'title' => '선린 소수전공 4기 정보보안 프로젝트 (진행중)',
         'page' => 'projects', 'section' => 'personal',
         'category' => 'security', 'year' => '2026', 'tags' => '선린, 소수전공, 정보보안',
+        'body' => ''
+      },
+      {
+        'title' => '선린 소수전공 3기 리버싱 심화',
+        'page' => 'projects', 'section' => 'personal',
+        'category' => 'security', 'year' => '2026', 'tags' => '선린, 소수전공, 리버싱',
         'body' => ''
       }
     ].freeze

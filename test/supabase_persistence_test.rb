@@ -235,6 +235,19 @@ class SupabasePersistenceTest < Minitest::Test
     assert_nil client.restore_state
     assert_equal 'sb_secret_test', calls.fetch(0)[:headers]['apikey']
     refute calls.fetch(0)[:headers].key?('Authorization')
+    assert_equal 'identity', calls.fetch(0)[:headers]['Accept-Encoding']
+  end
+
+  def test_non_json_database_response_reports_safe_response_details
+    response = Response.new('200', '<html>gateway page</html>')
+    response.define_singleton_method(:[]) { |name| name.to_s.downcase == 'content-type' ? 'text/html' : nil }
+    client = Portfolio::SupabaseDatabaseClient.new(url: 'https://example.supabase.co', service_role_key: 'sb_secret_test',
+      transport: ->(**) { response })
+
+    error = assert_raises(Portfolio::PersistenceError) { client.restore_state }
+    assert_includes error.message, 'HTTP 200'
+    assert_includes error.message, 'text/html'
+    refute_includes error.message, 'sb_secret_test'
   end
 
   def test_storage_client_uses_no_store_upload_and_cache_busted_download

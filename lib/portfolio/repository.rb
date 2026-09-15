@@ -384,7 +384,7 @@ module Portfolio
 
       ensure_hardcoded_navigation!
       update_profile(HardcodedContent::PROFILE)
-      projects.select { |project| HardcodedContent::OBSOLETE_PROJECT_TITLES.include?(project['title']) }.each do |project|
+      projects.select { |project| HardcodedContent::REFRESH_RECORD_TITLES.include?(project['title']) }.each do |project|
         delete_project(project['id'])
       end
       HardcodedContent::RECORDS.each do |record|

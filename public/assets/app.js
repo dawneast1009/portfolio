@@ -73,11 +73,45 @@
     });
   });
   let dirty = false;
-  document.querySelector('[data-unsaved-form]')?.addEventListener('input', () => {
-    dirty = true; const status = document.querySelector('[data-save-status]');
-    if (status) status.textContent = '저장되지 않은 변경 내용이 있습니다';
+  const draftForm = document.querySelector('[data-unsaved-form]');
+  const draftStorageKey = draftForm?.dataset.draftKey ? `portfolio-entry-draft:${draftForm.dataset.draftKey}` : null;
+  const draftFields = ['section', 'status', 'title', 'body', 'link', 'level'];
+  const readDraftValues = () => Object.fromEntries(draftFields.map(name => [name, draftForm?.elements.namedItem(name)?.value ?? '']));
+  const writeDraftValues = values => draftFields.forEach(name => {
+    const field = draftForm?.elements.namedItem(name);
+    if (field && Object.prototype.hasOwnProperty.call(values, name)) field.value = values[name];
   });
-  document.querySelector('[data-unsaved-form]')?.addEventListener('submit', () => { dirty = false; });
+  if (draftStorageKey) {
+    try {
+      const draft = JSON.parse(localStorage.getItem(draftStorageKey) || 'null');
+      if (draft?.submitted) localStorage.removeItem(draftStorageKey);
+      else if (draft?.values) {
+        writeDraftValues(draft.values);
+        dirty = true;
+        document.querySelector('[data-save-status]').textContent = '이 브라우저에 임시 저장된 내용을 복구했습니다';
+      }
+    } catch { localStorage.removeItem(draftStorageKey); }
+  }
+  let draftTimer;
+  draftForm?.addEventListener('input', () => {
+    dirty = true; const status = document.querySelector('[data-save-status]');
+    if (status) status.textContent = '임시 저장 중…';
+    clearTimeout(draftTimer);
+    draftTimer = setTimeout(() => {
+      if (!draftStorageKey) return;
+      try {
+        localStorage.setItem(draftStorageKey, JSON.stringify({ values: readDraftValues(), submitted: false }));
+        if (status) status.textContent = '이 브라우저에 임시 저장했습니다';
+      } catch { if (status) status.textContent = '임시 저장 공간을 사용할 수 없습니다'; }
+    }, 400);
+  });
+  draftForm?.addEventListener('submit', () => {
+    dirty = false;
+    clearTimeout(draftTimer);
+    if (draftStorageKey) {
+      try { localStorage.setItem(draftStorageKey, JSON.stringify({ values: readDraftValues(), submitted: true })); } catch {}
+    }
+  });
   document.querySelector('.upload-form')?.addEventListener('submit', event => {
     if (dirty && !confirm('본문에 저장하지 않은 내용이 있습니다. 파일을 첨부하면 해당 변경 내용은 사라집니다. 계속할까요?')) event.preventDefault();
     else if (!event.defaultPrevented) dirty = false;

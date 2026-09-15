@@ -117,11 +117,27 @@ class HttpTest
     refute_includes empty_activities, '>기타 강점<'
   end
 
+  def test_home_index_lists_only_sections_with_public_records
+    @repo.save_entry({'title'=>'수상 기록','body'=>'내용','page'=>'activities',
+      'section'=>'awards','status'=>'published','level'=>''})
+
+    home = request('GET', '/', cookie:false).body.force_encoding('UTF-8')
+    activities_row = home[/href="\/activities" class="index-row".*?<\/a>/m]
+    assert_includes activities_row, '수상·대회'
+    refute_includes activities_row, '교과활동'
+    refute_includes activities_row, '동아리활동'
+  end
+
   def test_notebook_editor_requires_login_and_csrf
     assert_equal '303', request('GET','/admin/notebook/new?page=about&section=strengths').code
     token = login
     page = request('GET','/admin/notebook/new?page=about&section=strengths')
     assert_equal '200', page.code
+    assert_includes page.body, 'data-draft-key='
+    assert_includes page.body.force_encoding('UTF-8'), '이 브라우저에 자동으로 임시 저장됩니다'
+    script = request('GET', '/assets/app.js', cookie:false).body
+    assert_includes script, 'localStorage.setItem(draftStorageKey'
+    assert_includes script, 'localStorage.getItem(draftStorageKey'
     assert_equal '403', request('POST','/admin/notebook', form:{'title'=>'몰래 변경'}).code
     response = request('POST','/admin/notebook',form:{'_csrf'=>token,'title'=>'강점 기록','body'=>'나의 글','page'=>'about','section'=>'strengths','status'=>'published','level'=>''})
     assert_equal '303', response.code
