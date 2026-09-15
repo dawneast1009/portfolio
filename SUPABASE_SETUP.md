@@ -11,7 +11,7 @@
 
 ## 2. 상태 테이블 만들기
 
-Supabase SQL Editor에서 [`supabase/schema.sql`](supabase/schema.sql)의 내용을 실행합니다. `portfolio_state`는 서버만 사용하는 단일 상태 행이며, RLS가 켜져 있어 공개 API에서 읽을 수 없습니다.
+Supabase SQL Editor에서 [`supabase/schema.sql`](supabase/schema.sql)의 내용을 실행합니다. 이미 테이블을 만들었다면 파일의 마지막 `grant` 문장도 다시 실행하세요. `portfolio_state`는 서버만 사용하는 단일 상태 행이며, RLS가 켜져 있어 공개 API에서 읽을 수 없습니다.
 
 무료 플랜은 프로젝트당 Storage 1GB를 제공하고, 무료 프로젝트의 파일 하나는 최대 50MB입니다. 이 앱의 기본 파일 제한은 파일당 10MB입니다. 무료 프로젝트는 장기간 사용하지 않으면 일시 중지될 수 있지만 저장된 데이터는 유지됩니다.
 

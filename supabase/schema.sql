@@ -7,3 +7,7 @@ create table if not exists public.portfolio_state (
 );
 
 alter table public.portfolio_state enable row level security;
+
+-- New Supabase projects may require explicit Data API grants for new tables.
+grant usage on schema public to service_role;
+grant select, insert, update on table public.portfolio_state to service_role;
