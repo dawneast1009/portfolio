@@ -2,9 +2,10 @@
 
 module Portfolio
   module HardcodedContent
-    VERSION = 6
+    VERSION = 7
     PDF_FILENAME = 'CamScanner 2026. 09. 08. 12(1).pdf'
-    REFRESH_RECORD_TITLES = ['PQC 암호 연구 (진행중)', '동아리 활동', '수상 및 대회 실적'].freeze
+    REFRESH_RECORD_TITLES = ['PQC 암호 연구 (진행중)', '동아리 활동', '수상 및 대회 실적',
+      '선린 소수전공 3기 리버싱 심화'].freeze
 
     PROFILE = {
       'display_name' => 'dawneast',
@@ -89,8 +90,8 @@ module Portfolio
         'body' => ''
       },
       {
-        'title' => '선린 소수전공 3기 리버싱 심화',
-        'page' => 'projects', 'section' => 'personal',
+        'title' => '선린 소수전공 3기 리버싱 심화 과정',
+        'page' => 'activities', 'section' => 'advanced_study',
         'category' => 'security', 'year' => '2026', 'tags' => '선린, 소수전공, 리버싱',
         'body' => ''
       }

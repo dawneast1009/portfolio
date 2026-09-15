@@ -107,7 +107,7 @@ class DeploymentTest < Minitest::Test
     assert_equal 11, repository.projects.length
     seeded_titles = ['동아리 활동', '수상 및 대회 실적', '진로 학습지', '포트폴리오 사이트',
       '시스템 해킹 진로', 'PQC 암호 연구 (진행중)', '선린 소수전공 4기 정보보안 프로젝트 (진행중)',
-      '선린 소수전공 3기 리버싱 심화']
+      '선린 소수전공 3기 리버싱 심화 과정']
     repository.projects.reject { |p| seeded_titles.include?(p['title']) }.each do |p|
       repository.delete_project(p['id'])
     end

@@ -52,8 +52,11 @@ class HardcodedContentTest < Minitest::Test
     assert_equal '', pqc['body']
     assert_equal 'personal', school_project['notebook_section']
     assert_equal '', school_project['body']
-    reversing = @repo.projects.find { |record| record['title'] == '선린 소수전공 3기 리버싱 심화' }
-    assert_equal 'personal', reversing['notebook_section']
+    reversing = @repo.projects.find { |record| record['title'] == '선린 소수전공 3기 리버싱 심화 과정' }
+    assert_equal 'activities', reversing['notebook_page']
+    assert_equal 'advanced_study', reversing['notebook_section']
+    activities = Portfolio::Notebook.page(@repo.notebook_navigation, 'activities')
+    assert_equal '전공 심화 활동', Portfolio::Notebook.section(activities, 'advanced_study')['title']
     worksheet = @repo.files.find { |file| file['filename'] == Portfolio::HardcodedContent::PDF_FILENAME }
     refute_nil worksheet
     assert_equal true, worksheet['public']
@@ -73,6 +76,8 @@ class HardcodedContentTest < Minitest::Test
     @repo.setup_admin('owner', 'a-content-test-password!')
     @repo.save_entry({'title'=>'PQC 암호 연구 (진행중)','body'=>'선린 소수전공 4기 정보보안 프로젝트',
       'page'=>'projects','section'=>'personal','status'=>'published','level'=>''})
+    @repo.save_entry({'title'=>'선린 소수전공 3기 리버싱 심화','body'=>'',
+      'page'=>'projects','section'=>'personal','status'=>'published','level'=>''})
 
     @repo.seed_hardcoded_content!(pdf_path: @pdf)
 
@@ -82,5 +87,9 @@ class HardcodedContentTest < Minitest::Test
     assert @repo.projects.any? do |record|
       record['title'] == '선린 소수전공 4기 정보보안 프로젝트 (진행중)'
     end
+    refute @repo.projects.any? { |record| record['title'] == '선린 소수전공 3기 리버싱 심화' }
+    reversing = @repo.projects.find { |record| record['title'] == '선린 소수전공 3기 리버싱 심화 과정' }
+    assert_equal 'activities', reversing['notebook_page']
+    assert_equal 'advanced_study', reversing['notebook_section']
   end
 end

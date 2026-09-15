@@ -454,7 +454,7 @@ module Portfolio
         navigation = navigation_state(state)
         additions = {
           'career' => [['system_hacking', '시스템 해킹 진로'], ['worksheets', '진로 학습지'], ['portfolio', '포트폴리오']],
-          'activities' => [['awards', '수상·대회']]
+          'activities' => [['awards', '수상·대회'], ['advanced_study', '전공 심화 활동']]
         }
         career = Notebook.page(navigation, 'career')
         if career
