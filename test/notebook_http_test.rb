@@ -93,13 +93,30 @@ class HttpTest
   end
 
   def test_notebook_five_pages_show_correct_sections
-    { '/' => '포트폴리오', '/about'=>'가치관', '/career'=>'관심 직업', '/activities'=>'사용 프로그램 및 숙련도', '/projects'=>'주제탐구보고서' }.each do |path, text|
+    { '/' => '포트폴리오', '/about'=>'내 소개', '/career'=>'진로활동', '/activities'=>'주요 활동 및 스킬', '/projects'=>'프로젝트' }.each do |path, text|
       response = request('GET', path)
       assert_equal '200', response.code, path
       assert_includes response.body.force_encoding('UTF-8'), text
       assert_includes response.body, 'aria-label="포트폴리오 메뉴"'
     end
   end
+
+  def test_about_hides_empty_sections_until_a_public_record_exists
+    empty_page = request('GET', '/about', cookie:false).body.force_encoding('UTF-8')
+    refute_includes empty_page, '아직 공개된 기록이 없습니다.'
+    refute_includes empty_page, '>강점<'
+
+    @repo.save_entry({'title'=>'나의 강점','body'=>'끝까지 해결합니다','page'=>'about',
+      'section'=>'strengths','status'=>'published','level'=>''})
+    populated_page = request('GET', '/about', cookie:false).body.force_encoding('UTF-8')
+    assert_includes populated_page, '>강점<'
+    assert_includes populated_page, '나의 강점'
+
+    empty_activities = request('GET', '/activities', cookie:false).body.force_encoding('UTF-8')
+    refute_includes empty_activities, '>교과활동<'
+    refute_includes empty_activities, '>기타 강점<'
+  end
+
   def test_notebook_editor_requires_login_and_csrf
     assert_equal '303', request('GET','/admin/notebook/new?page=about&section=strengths').code
     token = login

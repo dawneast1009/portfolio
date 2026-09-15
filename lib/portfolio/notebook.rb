@@ -29,8 +29,7 @@ module Portfolio
       { 'id'=>'career', 'title'=>'진로활동', 'icon'=>'pin',
         'description'=>'관심에서 시작해 나의 진로를 구체적으로 알아보기',
         'sections'=>[
-          { 'id'=>'fields', 'title'=>'관심 분야' }, { 'id'=>'jobs', 'title'=>'관심 직업' },
-          { 'id'=>'majors', 'title'=>'관심 학과' }, { 'id'=>'worksheets', 'title'=>'진로 학습지' },
+          { 'id'=>'system_hacking', 'title'=>'시스템 해킹 진로' }, { 'id'=>'worksheets', 'title'=>'진로 학습지' },
           { 'id'=>'portfolio', 'title'=>'포트폴리오' }
         ] },
       { 'id'=>'activities', 'title'=>'주요 활동 및 스킬', 'icon'=>'grid',
@@ -46,7 +45,7 @@ module Portfolio
         'sections'=>[
           { 'id'=>'reading', 'title'=>'독서' }, { 'id'=>'report', 'title'=>'주제탐구보고서' },
           { 'id'=>'subject', 'title'=>'교과 프로젝트' }, { 'id'=>'career', 'title'=>'진로 프로젝트' },
-          { 'id'=>'personal', 'title'=>'개인 프로젝트' }, { 'id'=>'outcomes', 'title'=>'작품 및 결과물' }
+          { 'id'=>'personal', 'title'=>'프로젝트' }, { 'id'=>'outcomes', 'title'=>'작품 및 결과물' }
         ] }
     ])
 

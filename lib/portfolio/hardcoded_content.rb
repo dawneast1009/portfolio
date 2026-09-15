@@ -2,20 +2,18 @@
 
 module Portfolio
   module HardcodedContent
-    VERSION = 2
+    VERSION = 4
     PDF_FILENAME = 'CamScanner 2026. 09. 08. 12(1).pdf'
 
     PROFILE = {
       'display_name' => 'dawneast',
       'role' => '시스템 해킹·CTF 활동',
-      'headline' => '시스템 해킹을 배우며 성장하는 보안 인재',
-      'intro' => '시스템 해킹을 주 분야로 CTF와 프로젝트에 도전하고, 직접 만들고 기록하며 성장하고 있습니다.',
+      'headline' => '나의 포트폴리오',
+      'intro' => '나의 관심과 진로, 활동과 결과물을 한곳에 정리합니다.',
       'bio' => <<~TEXT.strip,
-        안녕하세요. 시스템 해킹을 주 분야로 공부하며 CTF와 다양한 프로젝트에 도전하고 있는 dawneast입니다.
+        안녕하세요. 시스템 해킹을 주 분야로 공부 중인 dawneast입니다.
 
-        문제를 풀 때는 결과만 남기지 않고 풀이 과정과 배운 점을 기록하려고 합니다. Linux 환경과 바이너리, 메모리 구조를 이해하는 시스템 해킹을 중심으로 기초를 넓히고, 팀 활동과 대회를 통해 협업과 문제 해결 능력을 키우고 있습니다.
-
-        이 포트폴리오는 수상 및 대회 기록, 동아리 활동, 진로 학습지와 직접 만든 포트폴리오 사이트를 한곳에 정리한 공간입니다.
+        이 사이트는 제가 공부하고 여러 경험을 쌓으면서 참여한 CTF 대회와 동아리 활동, 진행한 프로젝트와 진로 학습 자료 등을 기록해 놓은 포트폴리오 사이트입니다.
       TEXT
       'skills' => '시스템 해킹, CTF, Linux, 바이너리 분석, Ruby, 문제 해결',
       'location' => 'Sunrin Internet High School',
@@ -23,6 +21,20 @@ module Portfolio
     }.freeze
 
     RECORDS = [
+      {
+        'title' => '시스템 해킹 진로', 'page' => 'career', 'section' => 'system_hacking',
+        'category' => 'security', 'year' => '2026', 'tags' => '시스템 해킹, 진로, 정보보호',
+        'body' => <<~TEXT.strip
+          관심 분야
+          시스템과 프로그램이 동작하는 원리를 이해하고 취약점을 찾아 해결하는 시스템 해킹에 관심이 있습니다.
+
+          관심 직업
+          보안 연구원과 취약점 분석가를 진로로 생각하고 있습니다.
+
+          관심 학과
+          정보보호학과와 컴퓨터공학과 등 보안과 시스템을 깊이 공부할 수 있는 학과에 관심이 있습니다.
+        TEXT
+      },
       {
         'title' => '수상 및 대회 실적', 'page' => 'activities', 'section' => 'awards',
         'category' => 'security', 'year' => '2026', 'tags' => 'CTF, 보안, 수상',
@@ -59,9 +71,18 @@ module Portfolio
         'title' => '포트폴리오 사이트', 'page' => 'career', 'section' => 'portfolio',
         'category' => 'development', 'year' => '2026', 'tags' => 'Ruby, Supabase, 포트폴리오',
         'body' => <<~TEXT.strip
-          나의 활동과 결과물을 직접 정리하고 공개하기 위해 만든 포트폴리오 사이트입니다.
+          공부하며 쌓은 경험과 결과물을 한눈에 볼 수 있도록 직접 만든 포트폴리오 사이트입니다.
 
-          Ruby 기반 웹 애플리케이션으로 프로필과 기록을 관리하고, Supabase Database와 Storage를 연결해 재시작 이후에도 내용과 첨부파일이 유지되도록 구성했습니다. 관리자 화면에서 상위 메뉴, 하위 항목, 진로 기록과 프로젝트를 직접 수정할 수 있습니다.
+          CTF 대회와 동아리 활동, 수상 기록, 진로 학습 자료를 주제별로 정리했습니다. 앞으로 새롭게 배우고 도전한 내용도 꾸준히 추가하며 저의 성장 과정을 기록해 나갈 예정입니다.
+        TEXT
+      },
+      {
+        'title' => 'PQC 암호 연구 (진행중)', 'page' => 'projects', 'section' => 'personal',
+        'category' => 'research', 'year' => '2026', 'tags' => 'PQC, 암호학, 정보보안',
+        'body' => <<~TEXT.strip
+          선린 소수전공 4기 정보보안 프로젝트로 진행 중인 PQC 암호 연구입니다.
+
+          양자컴퓨터 환경에서도 안전하게 사용할 수 있는 양자내성암호의 필요성과 원리를 공부하고 있습니다. 관련 알고리즘과 활용 사례를 조사하며 연구 내용을 정리하고 있습니다.
         TEXT
       }
     ].freeze

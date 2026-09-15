@@ -1,4 +1,6 @@
 <% page = notebook_page(@page_key) %>
+<% section_records = page['sections'].map { |section| [section, notebook_records(@page_key, section['id'])] } %>
+<% section_records.reject! { |_section, records| records.empty? } %>
 <header class="page-heading">
   <div class="page-symbol"><%= icon(page['icon']) %></div>
   <div class="heading-row"><h1><%= h(@page_key == 'home' ? @profile['headline'] : page['title']) %></h1><% if editable? && @page_key == 'home' %><div class="heading-actions"><a class="button quiet" href="/admin/profile"><%= icon('edit') %>소개 수정</a><a class="button quiet" href="/admin/navigation"><%= icon('grid') %>목차 편집</a></div><% end %></div>
@@ -11,7 +13,7 @@
     <% end %>
   </div></section>
 <% else %>
-<nav class="section-jumps" aria-label="페이지 안의 항목"><% page['sections'].each do |section| %><a href="#<%= h(section['id']) %>"><%= h(section['title']) %></a><% end %></nav>
+<% unless section_records.empty? %><nav class="section-jumps" aria-label="페이지 안의 항목"><% section_records.each do |section, _records| %><a href="#<%= h(section['id']) %>"><%= h(section['title']) %></a><% end %></nav><% end %>
 <% end %>
 <% if @page_key == 'about' %>
   <% unless @profile['bio'].to_s.empty? %><div class="prose legacy-intro"><%= paragraphs(@profile['bio']) %></div><% end %>
@@ -19,8 +21,7 @@
 <% end %>
 <% if @page_key == 'projects' && !@static %><form class="page-search" action="/projects" method="get"><label class="visually-hidden" for="project-query">프로젝트 검색</label><input id="project-query" name="q" maxlength="200" value="<%= h(@filter_query) %>" placeholder="제목 또는 내용으로 찾기"><button class="button quiet" type="submit"><%= icon('search') %>검색</button></form><% end %>
 <div class="document-sections">
-<% page['sections'].each do |section| %>
-  <% records = notebook_records(@page_key,section['id']) %>
+<% section_records.each do |section, records| %>
   <section class="document-section" id="<%= h(section['id']) %>">
     <div class="section-heading"><h2><%= h(section['title']) %><span class="section-count"><%= records.size %></span></h2><% if editable? %><a class="button quiet small" href="/admin/notebook/new?page=<%= q(@page_key) %>&amp;section=<%= q(section['id']) %>"><%= icon('plus') %>기록 추가</a><% end %></div>
     <% if records.empty? %><p class="empty-note"><%= editable? ? '아직 기록이 없습니다. 글을 쓰거나 파일을 붙여 보세요.' : '아직 공개된 기록이 없습니다.' %></p><% end %>

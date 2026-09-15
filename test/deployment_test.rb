@@ -37,7 +37,7 @@ class DeploymentTest < Minitest::Test
     titles = repository.projects.map { |project| project['title'] }
     assert_includes titles, '동아리 활동'
     assert_includes titles, '수상 및 대회 실적'
-    assert_equal 4, repository.projects.length
+    assert_equal 6, repository.projects.length
   end
 
   def test_restart_preserves_account_and_does_not_need_bootstrap_secret
@@ -104,13 +104,14 @@ class DeploymentTest < Minitest::Test
   def test_demo_is_only_seeded_on_first_account_creation
     @env['SEED_DEMO'] = 'true'
     prepare
-    assert_equal 7, repository.projects.length
-    seeded_titles = ['동아리 활동', '수상 및 대회 실적', '진로 학습지', '포트폴리오 사이트']
+    assert_equal 9, repository.projects.length
+    seeded_titles = ['동아리 활동', '수상 및 대회 실적', '진로 학습지', '포트폴리오 사이트',
+      '시스템 해킹 진로', 'PQC 암호 연구 (진행중)']
     repository.projects.reject { |p| seeded_titles.include?(p['title']) }.each do |p|
       repository.delete_project(p['id'])
     end
     prepare
-    assert_equal 4, repository.projects.length
+    assert_equal 6, repository.projects.length
   end
 
   def test_deployment_requires_explicit_storage_path

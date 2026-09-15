@@ -450,14 +450,28 @@ module Portfolio
       @store.update do |state|
         navigation = navigation_state(state)
         additions = {
-          'career' => [['worksheets', '진로 학습지'], ['portfolio', '포트폴리오']],
+          'career' => [['system_hacking', '시스템 해킹 진로'], ['worksheets', '진로 학습지'], ['portfolio', '포트폴리오']],
           'activities' => [['awards', '수상·대회']]
         }
+        career = Notebook.page(navigation, 'career')
+        if career
+          legacy_ids = %w[fields jobs majors]
+          career['sections'].reject! do |section|
+            legacy_ids.include?(section['id']) && state['projects'].values.none? do |record|
+              Notebook.page_of(record, navigation) == 'career' && Notebook.section_of(record, navigation) == section['id']
+            end
+          end
+        end
+        projects_page = Notebook.page(navigation, 'projects')
+        personal = Notebook.section(projects_page, 'personal')
+        personal['title'] = '프로젝트' if personal
         additions.each do |page_id, sections|
           page_record = Notebook.page(navigation, page_id)
           next unless page_record
-          sections.each do |section_id, title|
-            page_record['sections'] << { 'id' => section_id, 'title' => title } unless Notebook.section(page_record, section_id)
+          sections.reverse_each do |section_id, title|
+            next if Notebook.section(page_record, section_id)
+            item = { 'id' => section_id, 'title' => title }
+            page_id == 'career' ? page_record['sections'].unshift(item) : page_record['sections'] << item
           end
         end
       end

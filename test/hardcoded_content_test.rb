@@ -21,13 +21,26 @@ class HardcodedContentTest < Minitest::Test
     @repo.seed_hardcoded_content!(pdf_path: @pdf)
 
     assert_equal 'dawneast', @repo.profile['display_name']
-    assert_includes @repo.profile['intro'], '시스템 해킹'
+    assert_equal '나의 포트폴리오', @repo.profile['headline']
+    assert_equal '나의 관심과 진로, 활동과 결과물을 한곳에 정리합니다.', @repo.profile['intro']
+    assert_includes @repo.profile['bio'], '안녕하세요. 시스템 해킹을 주 분야로 공부 중인 dawneast입니다.'
+    assert_includes @repo.profile['bio'], '기록해 놓은 포트폴리오 사이트입니다.'
     assert_equal 'https://velog.io/@dawneast/posts', @repo.profile['blog_url']
     assert_includes @repo.profile['bio'], 'CTF'
     assert @repo.projects.any? { |record| record['title'] == '수상 및 대회 실적' && record['notebook_page'] == 'activities' }
     assert @repo.projects.any? { |record| record['title'] == '동아리 활동' && record['notebook_section'] == 'club' }
     assert @repo.projects.any? { |record| record['title'] == '진로 학습지' && record['notebook_page'] == 'career' }
     assert @repo.projects.any? { |record| record['title'] == '포트폴리오 사이트' && record['notebook_page'] == 'career' }
+    assert @repo.projects.any? do |record|
+      record['title'] == '시스템 해킹 진로' && record['notebook_section'] == 'system_hacking'
+    end
+    portfolio = @repo.projects.find { |record| record['title'] == '포트폴리오 사이트' }
+    assert_includes portfolio['body'], '성장 과정'
+    refute_includes portfolio['body'], 'Supabase Database'
+    pqc = @repo.projects.find { |record| record['title'] == 'PQC 암호 연구 (진행중)' }
+    assert_equal 'projects', pqc['notebook_page']
+    assert_equal 'personal', pqc['notebook_section']
+    assert_includes pqc['body'], '선린 소수전공 4기'
     worksheet = @repo.files.find { |file| file['filename'] == Portfolio::HardcodedContent::PDF_FILENAME }
     refute_nil worksheet
     assert_equal true, worksheet['public']

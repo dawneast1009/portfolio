@@ -21,11 +21,13 @@ class NotebookTest < Minitest::Test
     assert_equal ['홈', '내 소개', '진로활동', '주요 활동 및 스킬', '프로젝트'], navigation.map { |page| page['title'] }
     projects = navigation.find { |page| page['id'] == 'projects' }
     assert_equal %w[reading report subject career personal outcomes], projects['sections'].map { |section| section['id'] }
+    assert_equal '프로젝트', Portfolio::Notebook.section(projects, 'personal')['title']
   end
   def test_navigation_defaults_preserve_existing_ids_and_urls
     navigation = @repo.notebook_navigation
     assert_equal %w[home about career activities projects], navigation.map { |page| page['id'] }
     assert_equal %w[strengths interests values career_history], navigation[1]['sections'].map { |section| section['id'] }
+    assert_equal %w[system_hacking worksheets portfolio], navigation[2]['sections'].map { |section| section['id'] }
     assert_equal '/', Portfolio::Notebook.path('home')
     assert_equal '/about', Portfolio::Notebook.path('about')
   end
