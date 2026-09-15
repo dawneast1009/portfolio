@@ -7,6 +7,7 @@ require_relative 'store'
 require_relative 'uploads'
 require_relative 'notebook'
 require_relative 'supabase_persistence'
+require_relative 'hardcoded_content'
 
 module Portfolio
   class Repository
@@ -378,6 +379,29 @@ module Portfolio
       end
     end
 
+    def seed_hardcoded_content!(pdf_path: nil)
+      return if @store.read['hardcoded_content_version'].to_i >= HardcodedContent::VERSION
+
+      ensure_hardcoded_navigation!
+      update_profile(HardcodedContent::PROFILE)
+      HardcodedContent::RECORDS.each do |record|
+        next if projects.any? { |project| project['title'] == record['title'] && project['notebook_page'] == record['page'] }
+
+        save_entry(record.merge('status' => 'published', 'level' => ''))
+      end
+
+      worksheet = projects.find { |project| project['title'] == '진로 학습지' }
+      worksheet_file_exists = files.any? do |file|
+        worksheet && file['filename'] == HardcodedContent::PDF_FILENAME && file['project_id'] == worksheet['id']
+      end
+      if worksheet && pdf_path && File.file?(pdf_path) && !worksheet_file_exists
+        add_file(filename: HardcodedContent::PDF_FILENAME, bytes: File.binread(pdf_path), project_id: worksheet['id'],
+          label: '진로 학습지 원본', public: true)
+      end
+
+      @store.update { |state| state['hardcoded_content_version'] = HardcodedContent::VERSION }
+    end
+
     def clear_demo
       removed = @store.update do |state|
         ids = state['projects'].values.select { |p| p['demo'] }.map { |p| p['id'] }
@@ -420,6 +444,23 @@ module Portfolio
 
     def navigation_state(state)
       state['notebook_navigation'] ||= Notebook.default_navigation
+    end
+
+    def ensure_hardcoded_navigation!
+      @store.update do |state|
+        navigation = navigation_state(state)
+        additions = {
+          'career' => [['worksheets', '진로 학습지'], ['portfolio', '포트폴리오']],
+          'activities' => [['awards', '수상·대회']]
+        }
+        additions.each do |page_id, sections|
+          page_record = Notebook.page(navigation, page_id)
+          next unless page_record
+          sections.each do |section_id, title|
+            page_record['sections'] << { 'id' => section_id, 'title' => title } unless Notebook.section(page_record, section_id)
+          end
+        end
+      end
     end
 
     def copy_value(value)

@@ -6,7 +6,7 @@
 
 1. [Supabase](https://supabase.com/)에서 무료 프로젝트를 만듭니다.
 2. `Storage → New bucket`을 선택합니다.
-3. 버킷 이름을 `portfolio-data`로 만들고 **Public bucket을 끕니다**.
+3. 버킷 이름을 `portfolio`로 만들고 **Public bucket을 끕니다**.
 4. `Project Settings → API`에서 `Project URL`과 `service_role` 키를 확인합니다. service_role 키는 서버 비밀값이므로 GitHub나 브라우저에 올리지 않습니다.
 
 ## 2. 상태 테이블 만들기
@@ -23,7 +23,7 @@ Render 서비스의 `Environment`에 다음 값을 추가합니다.
 | --- | --- |
 | `SUPABASE_URL` | Supabase Project URL |
 | `SUPABASE_SERVICE_ROLE_KEY` | Supabase `service_role` 키 (Secret) |
-| `SUPABASE_BUCKET` | `portfolio-data` |
+| `SUPABASE_BUCKET` | `portfolio` |
 
 `SUPABASE_SERVICE_ROLE_KEY`는 반드시 Secret으로 저장하세요. 공개 페이지를 보는 데는 로그인이 필요 없고, 소개·목차·글·파일을 수정할 때만 기존 관리자 로그인이 필요합니다.
 

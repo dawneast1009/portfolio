@@ -30,13 +30,15 @@ module Portfolio
         'description'=>'관심에서 시작해 나의 진로를 구체적으로 알아보기',
         'sections'=>[
           { 'id'=>'fields', 'title'=>'관심 분야' }, { 'id'=>'jobs', 'title'=>'관심 직업' },
-          { 'id'=>'majors', 'title'=>'관심 학과' }
+          { 'id'=>'majors', 'title'=>'관심 학과' }, { 'id'=>'worksheets', 'title'=>'진로 학습지' },
+          { 'id'=>'portfolio', 'title'=>'포트폴리오' }
         ] },
       { 'id'=>'activities', 'title'=>'주요 활동 및 스킬', 'icon'=>'grid',
         'description'=>'참여한 활동과 그 과정에서 익힌 것들',
         'sections'=>[
           { 'id'=>'subject', 'title'=>'교과활동' }, { 'id'=>'club', 'title'=>'동아리활동' },
-          { 'id'=>'career', 'title'=>'진로활동' }, { 'id'=>'tools', 'title'=>'사용 프로그램 및 숙련도' },
+          { 'id'=>'career', 'title'=>'진로활동' }, { 'id'=>'awards', 'title'=>'수상·대회' },
+          { 'id'=>'tools', 'title'=>'사용 프로그램 및 숙련도' },
           { 'id'=>'strengths', 'title'=>'기타 강점' }
         ] },
       { 'id'=>'projects', 'title'=>'프로젝트', 'icon'=>'folder',

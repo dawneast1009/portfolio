@@ -34,7 +34,10 @@ class DeploymentTest < Minitest::Test
     assert_equal ['portfolio-test.onrender.com'], settings.allowed_hosts
     assert repository.authenticate('owner', PASSWORD)
     refute @env.key?('ADMIN_PASSWORD')
-    assert_empty repository.projects
+    titles = repository.projects.map { |project| project['title'] }
+    assert_includes titles, '동아리 활동'
+    assert_includes titles, '수상 및 대회 실적'
+    assert_equal 4, repository.projects.length
   end
 
   def test_restart_preserves_account_and_does_not_need_bootstrap_secret
@@ -83,10 +86,13 @@ class DeploymentTest < Minitest::Test
   def test_demo_is_only_seeded_on_first_account_creation
     @env['SEED_DEMO'] = 'true'
     prepare
-    assert_equal 3, repository.projects.length
-    repository.projects.each { |p| repository.delete_project(p['id']) }
+    assert_equal 7, repository.projects.length
+    seeded_titles = ['동아리 활동', '수상 및 대회 실적', '진로 학습지', '포트폴리오 사이트']
+    repository.projects.reject { |p| seeded_titles.include?(p['title']) }.each do |p|
+      repository.delete_project(p['id'])
+    end
     prepare
-    assert_empty repository.projects
+    assert_equal 4, repository.projects.length
   end
 
   def test_deployment_requires_explicit_storage_path
@@ -122,7 +128,7 @@ class DeploymentTest < Minitest::Test
     env = service.fetch('envVars').to_h { |v| [v.fetch('key'), v] }
     assert_equal false, env.fetch('SUPABASE_URL').fetch('sync')
     assert_equal false, env.fetch('SUPABASE_SERVICE_ROLE_KEY').fetch('sync')
-    assert_equal 'portfolio-data', env.fetch('SUPABASE_BUCKET').fetch('value')
+    assert_equal 'portfolio', env.fetch('SUPABASE_BUCKET').fetch('value')
     setup = File.read(File.join(ROOT, 'SUPABASE_SETUP.md'), encoding: 'UTF-8')
     assert_includes setup, 'SUPABASE_SERVICE_ROLE_KEY'
     assert_includes setup, 'ruby bin/supabase-migrate'

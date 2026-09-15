@@ -23,7 +23,7 @@ services:
       - key: SUPABASE_SERVICE_ROLE_KEY
         sync: false
       - key: SUPABASE_BUCKET
-        value: portfolio-data
+        value: portfolio
       - key: BUNDLE_DEPLOYMENT
         value: "false"
       - key: BUNDLE_FROZEN

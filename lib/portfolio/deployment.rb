@@ -27,6 +27,7 @@ module Portfolio
         repository.setup_admin(username, password)
         repository.seed_demo if env['SEED_DEMO'] == 'true'
       end
+      repository.seed_hardcoded_content!(pdf_path: File.join(root, 'assets', 'career-worksheet.pdf'))
       settings
     end
   end
