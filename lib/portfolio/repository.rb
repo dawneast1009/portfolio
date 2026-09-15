@@ -384,6 +384,9 @@ module Portfolio
 
       ensure_hardcoded_navigation!
       update_profile(HardcodedContent::PROFILE)
+      projects.select { |project| HardcodedContent::OBSOLETE_PROJECT_TITLES.include?(project['title']) }.each do |project|
+        delete_project(project['id'])
+      end
       HardcodedContent::RECORDS.each do |record|
         next if projects.any? { |project| project['title'] == record['title'] && project['notebook_page'] == record['page'] }
 

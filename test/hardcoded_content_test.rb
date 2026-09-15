@@ -38,9 +38,13 @@ class HardcodedContentTest < Minitest::Test
     assert_includes portfolio['body'], '성장 과정'
     refute_includes portfolio['body'], 'Supabase Database'
     pqc = @repo.projects.find { |record| record['title'] == 'PQC 암호 연구 (진행중)' }
-    assert_equal 'projects', pqc['notebook_page']
+    school_project = @repo.projects.find do |record|
+      record['title'] == '선린 소수전공 4기 정보보안 프로젝트 (진행중)'
+    end
     assert_equal 'personal', pqc['notebook_section']
-    assert_includes pqc['body'], '선린 소수전공 4기'
+    assert_equal '', pqc['body']
+    assert_equal 'personal', school_project['notebook_section']
+    assert_equal '', school_project['body']
     worksheet = @repo.files.find { |file| file['filename'] == Portfolio::HardcodedContent::PDF_FILENAME }
     refute_nil worksheet
     assert_equal true, worksheet['public']
@@ -54,5 +58,20 @@ class HardcodedContentTest < Minitest::Test
     first_counts = [@repo.projects.size, @repo.files.size]
     @repo.seed_hardcoded_content!(pdf_path: @pdf)
     assert_equal first_counts, [@repo.projects.size, @repo.files.size]
+  end
+
+  def test_seed_replaces_previous_combined_project
+    @repo.setup_admin('owner', 'a-content-test-password!')
+    @repo.save_entry({'title'=>'PQC 암호 연구 (진행중)','body'=>'선린 소수전공 4기 정보보안 프로젝트',
+      'page'=>'projects','section'=>'personal','status'=>'published','level'=>''})
+
+    @repo.seed_hardcoded_content!(pdf_path: @pdf)
+
+    pqc_records = @repo.projects.select { |record| record['title'] == 'PQC 암호 연구 (진행중)' }
+    assert_equal 1, pqc_records.length
+    assert_equal '', pqc_records.first['body']
+    assert @repo.projects.any? do |record|
+      record['title'] == '선린 소수전공 4기 정보보안 프로젝트 (진행중)'
+    end
   end
 end

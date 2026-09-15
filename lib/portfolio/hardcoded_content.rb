@@ -2,8 +2,9 @@
 
 module Portfolio
   module HardcodedContent
-    VERSION = 4
+    VERSION = 5
     PDF_FILENAME = 'CamScanner 2026. 09. 08. 12(1).pdf'
+    OBSOLETE_PROJECT_TITLES = ['PQC 암호 연구 (진행중)'].freeze
 
     PROFILE = {
       'display_name' => 'dawneast',
@@ -79,11 +80,13 @@ module Portfolio
       {
         'title' => 'PQC 암호 연구 (진행중)', 'page' => 'projects', 'section' => 'personal',
         'category' => 'research', 'year' => '2026', 'tags' => 'PQC, 암호학, 정보보안',
-        'body' => <<~TEXT.strip
-          선린 소수전공 4기 정보보안 프로젝트로 진행 중인 PQC 암호 연구입니다.
-
-          양자컴퓨터 환경에서도 안전하게 사용할 수 있는 양자내성암호의 필요성과 원리를 공부하고 있습니다. 관련 알고리즘과 활용 사례를 조사하며 연구 내용을 정리하고 있습니다.
-        TEXT
+        'body' => ''
+      },
+      {
+        'title' => '선린 소수전공 4기 정보보안 프로젝트 (진행중)',
+        'page' => 'projects', 'section' => 'personal',
+        'category' => 'security', 'year' => '2026', 'tags' => '선린, 소수전공, 정보보안',
+        'body' => ''
       }
     ].freeze
   end
