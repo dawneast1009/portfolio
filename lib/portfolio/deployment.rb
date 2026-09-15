@@ -16,18 +16,29 @@ module Portfolio
       raise ArgumentError, 'STORAGE_DIR에 저장 경로를 명시하세요' if env['STORAGE_DIR'].to_s.empty?
 
       settings = Config.new(root: root, env: env)
-      repository = Repository.new(settings.storage_dir,
-        max_upload_bytes: settings.max_upload_bytes, max_storage_bytes: settings.max_storage_bytes,
-        persistence: SupabasePersistence.from_env(env))
-      unless repository.admin
-        if password.to_s.empty?
-          raise ArgumentError, '첫 실행에는 Render 환경변수 ADMIN_PASSWORD가 필요합니다 (15자 이상)'
+      bootstrap = lambda do |persistence|
+        repository = Repository.new(settings.storage_dir,
+          max_upload_bytes: settings.max_upload_bytes, max_storage_bytes: settings.max_storage_bytes,
+          persistence: persistence)
+        unless repository.admin
+          if password.to_s.empty?
+            raise ArgumentError, '첫 실행에는 Render 환경변수 ADMIN_PASSWORD가 필요합니다 (15자 이상)'
+          end
+          username = env['ADMIN_USERNAME'].to_s.empty? ? 'admin' : env['ADMIN_USERNAME']
+          repository.setup_admin(username, password)
+          repository.seed_demo if env['SEED_DEMO'] == 'true'
         end
-        username = env['ADMIN_USERNAME'].to_s.empty? ? 'admin' : env['ADMIN_USERNAME']
-        repository.setup_admin(username, password)
-        repository.seed_demo if env['SEED_DEMO'] == 'true'
+        repository.seed_hardcoded_content!(pdf_path: File.join(root, 'assets', 'career-worksheet.pdf'))
+        repository
       end
-      repository.seed_hardcoded_content!(pdf_path: File.join(root, 'assets', 'career-worksheet.pdf'))
+
+      begin
+        bootstrap.call(SupabasePersistence.from_env(env))
+      rescue PersistenceError => e
+        warn "Supabase 저장을 사용할 수 없어 기본 콘텐츠로 실행합니다 (#{e.message})"
+        %w[SUPABASE_URL SUPABASE_SERVICE_ROLE_KEY SUPABASE_SECRET_KEY].each { |key| env.delete(key) }
+        bootstrap.call(nil)
+      end
       settings
     end
   end

@@ -55,6 +55,24 @@ class DeploymentTest < Minitest::Test
     refute @env.key?('ADMIN_PASSWORD')
   end
 
+  def test_supabase_boot_failure_still_serves_hardcoded_portfolio
+    @env['SUPABASE_URL'] = 'https://example.supabase.co'
+    @env['SUPABASE_SERVICE_ROLE_KEY'] = 'sb_secret_test'
+
+    settings = nil
+    _stdout, stderr = capture_io do
+      Portfolio::SupabasePersistence.stub(:from_env, ->(*) { raise Portfolio::PersistenceError, 'invalid response' }) do
+        settings = prepare
+      end
+    end
+
+    assert_equal 'production', settings.environment
+    assert_includes repository.projects.map { |project| project['title'] }, '수상 및 대회 실적'
+    assert_includes stderr, 'Supabase 저장을 사용할 수 없어 기본 콘텐츠로 실행합니다'
+    refute @env.key?('SUPABASE_URL')
+    refute @env.key?('SUPABASE_SERVICE_ROLE_KEY')
+  end
+
   def test_new_storage_without_password_fails_closed
     @env.delete('ADMIN_PASSWORD')
     assert_raises(ArgumentError) { prepare }
